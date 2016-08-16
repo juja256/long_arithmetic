@@ -66,6 +66,8 @@ LONG_AR_FUNC void l_mul_one_digit(const L_NUMBER* n, WORD d, L_NUMBER* res);
 
 LONG_AR_FUNC void l_shift_l(const L_NUMBER* n, u32 digits, L_NUMBER* res); 
 
+LONG_AR_FUNC void l_shift_r(const L_NUMBER* n, u32 digits, L_NUMBER* res); 
+
 LONG_AR_FUNC void l_mul(const L_NUMBER* n1, const L_NUMBER* n2, L_NUMBER* res); 
 
 LONG_AR_FUNC void l_div(const L_NUMBER* n1, const L_NUMBER* n2, L_NUMBER* div, L_NUMBER* mod);

@@ -198,7 +198,7 @@ LONG_AR_FUNC void l_shift_l(const L_NUMBER* n, u32 p, L_NUMBER* res) {
         res->words[i] = 0;
     } 
     
-    int buf = 0;
+    WORD buf = 0;
     p = p % ARCH;
     if (p)
         for (u32 i = digits; i < n->len; i++) {
@@ -206,6 +206,25 @@ LONG_AR_FUNC void l_shift_l(const L_NUMBER* n, u32 p, L_NUMBER* res) {
             res->words[i] <<= p;
             res->words[i] += buf;
             buf = (cur & (MAX_WORD << (ARCH - p))) >> (ARCH - p);
+        }
+}
+
+LONG_AR_FUNC void l_shift_r(const L_NUMBER* n, u32 p, L_NUMBER* res) {
+    int digits = p / ARCH;
+    for (int i=0; i < n->len - digits; i++) {
+        res->words[i] = n->words[i+digits];
+    }
+    for (u32 i = n->len - digits; i < n->len; i++) {
+        res->words[i] = 0;
+    } 
+    WORD buf = 0;
+    p = p % ARCH;
+    if (p)
+        for (int i = n->len - digits -1; i >=0; i--) {
+            WORD cur = n->words[i];
+            res->words[i] >>= p;
+            res->words[i] += buf;
+            buf = (cur & (MAX_WORD >> (ARCH - p))) << (ARCH - p);
         }
 }
 

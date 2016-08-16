@@ -40,8 +40,14 @@ int main() {
     printf("Result: \n");
     l_dump(&n1, 'h');
     printf("Bl n1: %d\n", l_bit_len(&n1));
+
     printf("Shl n1 64:\n");
     l_shift_l(&n1, ARCH, &n1);
+    printf("Result: \n");
+    l_dump(&n1, 'h');
+
+    printf("Shr n1 32:\n");
+    l_shift_r(&n1, ARCH/2, &n1);
     printf("Result: \n");
     l_dump(&n1, 'h');
 
