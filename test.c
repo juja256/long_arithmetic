@@ -8,16 +8,21 @@ int main() {
     L_NUMBER n3;
     L_NUMBER r;
     L_NUMBER q;
+    L_NUMBER d;
     WORD p = 0x0A;
     l_init(&n3, 32);
     l_init(&r, 2);
     l_init(&q, 2);
-    if ( 
+    if ( (l_init_by_str(&d,"999999999999999999102435354648748786586796964976587")) ||
          (l_init_by_str(&n1,"0xFFFFFF00000000000000FFFF") != 0) || 
          (l_init_by_str(&n2,"0xFF000000000000000AAE") != 0)) {
         fprintf(stderr, "Error\n");
         exit(-2);
     } 
+    printf("Dump of 999999999999999999102435354648748786586796964976587:\n");
+    l_dump(&d, 'd');
+    l_dump(&d, 'h');
+    l_dump(&d, 'b');
     printf("Add n1 n2: \n");
     l_dump(&n1, 'h');
     l_dump(&n2, 'h');
@@ -59,9 +64,9 @@ int main() {
     l_dump(&n1, 'h');
 
     printf("Div n1 n2 r q: \n");
-    l_div(&n1, &n2, &r, &q);
     l_dump(&n1, 'h');
     l_dump(&n2, 'h');
+    l_div(&n1, &n2, &r, &q);
     printf("Result: \n");
     l_dump(&r, 'h');
     l_dump(&q, 'h');
@@ -79,6 +84,15 @@ int main() {
     l_dump(&n1, 'h');
     printf(HEX_FORMAT"\n", p);
     l_pow_slow(&n1, p, &n3);
+    printf("Result: \n");
+    l_dump(&n3, 'h');
+
+    l_null(&n3);
+
+    printf("PowW n1 p n3 4: \n");
+    l_dump(&n1, 'h');
+    printf(HEX_FORMAT"\n", p);
+    l_pow_window(&n1, p, &n3, 4);
     printf("Result: \n");
     l_dump(&n3, 'h');
 

@@ -46,7 +46,10 @@ typedef struct {
     u8 carry;
 } L_NUMBER;
 
+/* Common functions */
 LONG_AR_FUNC int l_init(L_NUMBER* n, u32 len); 
+
+//LONG_AR_FUNC int l_init_by_num(L_NUMBER* n, u32 len, WORD first); 
 
 LONG_AR_FUNC int l_init_by_str(L_NUMBER* n, const char* str); 
 
@@ -56,6 +59,11 @@ LONG_AR_FUNC void l_free(L_NUMBER* n);
 
 LONG_AR_FUNC void l_dump(const L_NUMBER* n, char format);
 
+LONG_AR_FUNC u32 l_bit_len(const L_NUMBER* n);
+
+LONG_AR_FUNC void l_null(L_NUMBER* n);
+
+/* Standard arithmetic functions */
 LONG_AR_FUNC void l_add(const L_NUMBER* n1, const L_NUMBER* n2, L_NUMBER* res); 
 
 LONG_AR_FUNC int l_sub(const L_NUMBER* n1, const L_NUMBER* n2, L_NUMBER* res); 
@@ -78,9 +86,7 @@ LONG_AR_FUNC void l_pow_slow(const L_NUMBER* n, WORD p, L_NUMBER* res);
 
 LONG_AR_FUNC void l_pow(const L_NUMBER* n, WORD p, L_NUMBER* res);
 
-LONG_AR_FUNC u32 l_bit_len(const L_NUMBER* n);
-
-LONG_AR_FUNC void l_null(L_NUMBER* n);
+LONG_AR_FUNC void l_pow_window(const L_NUMBER* n, WORD p, L_NUMBER* res, u32 win_size);
 
 #ifdef __cplusplus
 }
