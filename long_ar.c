@@ -278,16 +278,8 @@ LONG_AR_FUNC void l_dump(const L_NUMBER* n, char format) {
             l_init(&a, n->len);
             for (u32 i = 0; i<b; i++) {
                 l_div(n, &d, &c, &a);
-                //printf("%d\n", i);
-                //l_dump(&a, 'h');
-                //l_dump(&c, 'h');
                 l_div(&c, &ten, &c, &a);
-                //printf("\n");
-                //l_dump(&a, 'h');
-                //l_dump(&c, 'h');
-                //printf("\n");
                 digits[i] = a.words[0];
-                //l_null(&c);
                 l_mul(&d, &ten, &d);
             }
 
