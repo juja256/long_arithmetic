@@ -5,8 +5,9 @@
 #include <math.h>
 
 /* Static Begin */
+#define MIN(a,b) ((a)>=(b)) ? (b) : (a);
 
-static void l_mul_half_digit(const L_NUMBER* n, HALF d, L_NUMBER* res) {
+INTERNAL_AR_FUNC static void l_mul_half_digit(const L_NUMBER* n, HALF d, L_NUMBER* res) {
     WORD carry = 0, tmp;
     for (u32 i=0; i < n->len; i+=1) {
         /* First half */
@@ -26,7 +27,7 @@ static void l_mul_half_digit(const L_NUMBER* n, HALF d, L_NUMBER* res) {
     }
 }
 
-static u32 word_bit_len(WORD n) {
+INTERNAL_AR_FUNC static u32 word_bit_len(WORD n) {
     u32 c = ARCH;
     while (c) {
         if ((((WORD)1 << (ARCH-1)) & n) >> (ARCH-1))
@@ -39,8 +40,7 @@ static u32 word_bit_len(WORD n) {
 
 /* Static End */
 
-
-LONG_AR_FUNC int l_init(L_NUMBER* n, u32 len) {
+INTERNAL_AR_FUNC int l_init(L_NUMBER* n, u32 len) {
     n->words = (WORD*)malloc((len)*sizeof(WORD));
     memset(n->words, 0, (len)*sizeof(WORD));
     n->len = len;
@@ -48,7 +48,16 @@ LONG_AR_FUNC int l_init(L_NUMBER* n, u32 len) {
     return 0;
 }
 
-LONG_AR_FUNC int l_init_by_str(L_NUMBER* n, const char* str) {
+COMMON_AR_FUNC int l_init_by_len(L_NUMBER* n, u32 len) {
+    len = (len%ARCH==0) ? len/ARCH : len/ARCH + 1;
+    n->words = (WORD*)malloc((len)*sizeof(WORD));
+    memset(n->words, 0, (len)*sizeof(WORD));
+    n->len = len;
+    n->carry = 0;
+    return n->len;
+}
+
+COMMON_AR_FUNC int l_init_by_str(L_NUMBER* n, const char* str) {
     unsigned s_len = strlen(str);
     u64 tmp;
 
@@ -98,6 +107,7 @@ LONG_AR_FUNC int l_init_by_str(L_NUMBER* n, const char* str) {
         WORD bit_len = (WORD)((s_len)/0.301) + 1;
         n->len = (bit_len % ARCH == 0) ? bit_len / ARCH : bit_len / ARCH + 1; // lg(2)
         n->words = (WORD*)malloc((n->len)*sizeof(WORD));
+        memset(n->words, 0, (n->len)*sizeof(WORD));
         L_NUMBER a, d, t;
         l_init(&a, n->len);
         l_init(&d, n->len);
@@ -111,6 +121,7 @@ LONG_AR_FUNC int l_init_by_str(L_NUMBER* n, const char* str) {
                 l_add(n, &a, n);
                 l_null(&a);
                 l_mul(&d, &t, &d);
+
             }
         }
         l_free(&a);
@@ -120,24 +131,26 @@ LONG_AR_FUNC int l_init_by_str(L_NUMBER* n, const char* str) {
     return 0;
 }
 
-LONG_AR_FUNC void l_copy(L_NUMBER* dest, const L_NUMBER* source) {
+COMMON_AR_FUNC void l_copy(L_NUMBER* dest, const L_NUMBER* source) {
+    u32 len = MIN(dest->len, source->len);
     if (!dest->len) {
         dest->len = source->len;
         dest->carry = source->carry;
         dest->words = (WORD*)malloc((dest->len)*sizeof(WORD));
+        len = dest->len;
     }
-    for (u32 i=0; i<source->len; i++) {
+    for (u32 i=0; i<len; i++) {
         dest->words[i] = source->words[i];
         dest->carry = source->carry;
     }
 }
 
-LONG_AR_FUNC void l_free(L_NUMBER* n) {
+COMMON_AR_FUNC void l_free(L_NUMBER* n) {
     free(n->words);
     n->len = 0;
 }
 
-LONG_AR_FUNC void l_null(L_NUMBER* n) {
+COMMON_AR_FUNC void l_null(L_NUMBER* n) {
     for (u32 i=0; i<n->len; i++)
         n->words[i] = 0;
 }
@@ -240,17 +253,17 @@ LONG_AR_FUNC void l_shift_r(const L_NUMBER* n, u32 p, L_NUMBER* res) {
     p = p % ARCH;
     if (p)
         for (int i = n->len - digits -1; i >=0; i--) {
-            WORD cur = n->words[i];
+            WORD cur = res->words[i];
             res->words[i] >>= p;
             res->words[i] += buf;
             buf = (cur & (MAX_WORD >> (ARCH - p))) << (ARCH - p);
         }
 }
 
-LONG_AR_FUNC void l_mul(const L_NUMBER* n1, const L_NUMBER* n2, L_NUMBER* res) {
+LONG_AR_FUNC void l_mul(const L_NUMBER* n1, const L_NUMBER* n2, AUTO_SIZE L_NUMBER* res) {
     L_NUMBER tmp, res_tmp;
-    l_init(&tmp, 2 * n1->len);
-    l_init(&res_tmp, res->len);
+    l_init(&tmp, n2->len + n1->len);
+    l_init(&res_tmp, n2->len + n1->len);
 
     for (u32 i=0; i<n2->len; i++) {
         l_mul_one_digit(n1, n2->words[i], &tmp);
@@ -263,7 +276,7 @@ LONG_AR_FUNC void l_mul(const L_NUMBER* n1, const L_NUMBER* n2, L_NUMBER* res) {
     l_free(&res_tmp);
 }
 
-LONG_AR_FUNC void l_dump(const L_NUMBER* n, char format) {
+COMMON_AR_FUNC void l_dump(const L_NUMBER* n, char format) {
     WORD b;
     switch (format) {
         case 'd':
@@ -335,40 +348,51 @@ LONG_AR_FUNC u32 l_bit_len(const L_NUMBER* n) {
     return 0;
 }
 
-LONG_AR_FUNC void l_div(const L_NUMBER* a, const L_NUMBER* b, L_NUMBER* q, L_NUMBER* r) {
+LONG_AR_FUNC void l_div(const L_NUMBER* a, const L_NUMBER* b, L_NUMBER* q, AUTO_SIZE L_NUMBER* r) {
     u32 k = l_bit_len(b), t;
     L_NUMBER c;
     l_copy(r, a);
-    l_null(q);
-    if (!q->len)
-        l_init(q, a->len);
+    if (q)
+        l_null(q);
+
     l_init(&c, a->len);
     while (l_cmp(r, b) != -1) {
         t = l_bit_len(r);
         l_shift_l(b, t-k, &c);
         
-        
         if (l_cmp(&c, r) == 1) {
             l_shift_l(b, (--t)-k, &c);
-            
         }
         l_sub(r, &c, r);
-        q->words[(t-k)/ARCH] ^= ((WORD)1 << ((t-k)%ARCH));
+        if (q)
+            q->words[(t-k)/ARCH] ^= ((WORD)1 << ((t-k)%ARCH));
         
     }
     l_free(&c);
 }
 
-LONG_AR_FUNC void l_sqr(const L_NUMBER* n, L_NUMBER* res) { //Скр Скр Скр
-    L_NUMBER n2 = { 0, 0, 0 };
-    l_copy(&n2, n);
-    l_mul(n, &n2, res);
-    l_free(&n2);
+LONG_AR_FUNC void l_sqr(const L_NUMBER* n, AUTO_SIZE L_NUMBER* res) { //Скр Скр Скр
+    if (n != res) {
+        L_NUMBER a;
+        L_NUMBER n2 = { 0, 0, 0 };
+        l_init(&a, 2 * n->len);
+        l_copy(&n2, n);
+        l_mul(n, &n2, &a);
+        l_copy(res, &a);
+        l_free(&n2);
+        l_free(&a);
+    }
+    else {
+        L_NUMBER n2 = { 0, 0, 0 };
+        l_copy(&n2, n);
+        l_mul(n, &n2, res);
+        l_free(&n2);
+    }
 }
 
-LONG_AR_FUNC void l_pow_slow(const L_NUMBER* n, WORD p, L_NUMBER* res) {
+LONG_AR_FUNC void l_pow_slow(const L_NUMBER* n, WORD p, AUTO_SIZE L_NUMBER* res) {
     L_NUMBER a;
-    l_init(&a, res->len);
+    l_init(&a, n->len * p);
     a.words[0]=1;
     for (WORD i=0; i<p; i++) {
         l_mul(&a, n, &a);
@@ -377,28 +401,28 @@ LONG_AR_FUNC void l_pow_slow(const L_NUMBER* n, WORD p, L_NUMBER* res) {
     l_free(&a);
 }
 
-LONG_AR_FUNC void l_pow(const L_NUMBER* n, WORD p, L_NUMBER* res) {
+LONG_AR_FUNC void l_pow(const L_NUMBER* n, WORD p, AUTO_SIZE L_NUMBER* res) {
     u32 k = word_bit_len(p);
     L_NUMBER a, c;
-    l_init(&c, res->len);
-    l_init(&a, res->len);
+    l_init(&c, n->len * p);
+    l_init(&a, c.len);
     l_copy(&a, n);
 
     c.words[0] = 1;
-
+    l_dump(&a, 'h');
     for (u32 i=0; i<k; i++) {
-        if (p & (1 << i)) {
+        if (p & (1L << i)) {
             l_mul(&c, &a, &c);
         }
         l_sqr(&a, &a);
     }
-
+    l_dump(&c, 'h');
     l_copy(res, &c);
     l_free(&a);
     l_free(&c);
 }
 
-LONG_AR_FUNC void l_pow_window(const L_NUMBER* n, WORD p, L_NUMBER* res, u32 win_size) {
+LONG_AR_FUNC void l_pow_window(const L_NUMBER* n, WORD p, u32 win_size, L_NUMBER* d, AUTO_SIZE L_NUMBER* res) {
     u32 k = word_bit_len(p);
     u32 l = (1<<win_size);
     if (k%l == 0) k = k/l;
@@ -406,14 +430,16 @@ LONG_AR_FUNC void l_pow_window(const L_NUMBER* n, WORD p, L_NUMBER* res, u32 win
     WORD m = MAX_WORD >> (ARCH - win_size);
 
     L_NUMBER c;
-    l_init(&c, res->len);
+    l_init(&c, n->len * p);
     c.words[0] = 1;
 
-    L_NUMBER* d = (L_NUMBER*)malloc(sizeof(L_NUMBER)*l);
-    l_init(&d[0], res->len); d[0].words[0] = 1;
-    l_init(&d[1], res->len); l_copy(&d[1], n);
-    for (u32 i=2; i<l; i++) {
-        l_init(&d[i], res->len); l_mul(&d[i-1], n, &d[i]);
+    if (!d) {
+        d = (L_NUMBER*)malloc(sizeof(L_NUMBER)*l);
+        l_init(&d[0], c.len); d[0].words[0] = 1;
+        l_init(&d[1], c.len); l_copy(&d[1], n);
+        for (u32 i=2; i<l; i++) {
+            l_init(&d[i], c.len); l_mul(&d[i-1], n, &d[i]);
+        }
     }
 
     for (int i=k-1; i>=0; i--) {
@@ -432,4 +458,3 @@ LONG_AR_FUNC void l_pow_window(const L_NUMBER* n, WORD p, L_NUMBER* res, u32 win
     }
     free(d);
 }
-

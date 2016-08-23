@@ -10,9 +10,9 @@ int main() {
     L_NUMBER q;
     L_NUMBER d;
     WORD p = 0x0A;
-    l_init(&n3, 32);
-    l_init(&r, 2);
-    l_init(&q, 2);
+    l_init_by_len(&n3, 1024);
+    l_init_by_len(&r, 128);
+    l_init_by_len(&q, 128);
     if ( (l_init_by_str(&d,"999999999999999999102435354648748786586796964976587")) ||
          (l_init_by_str(&n1,"0xFFFFFF00000000000000FFFF") != 0) || 
          (l_init_by_str(&n2,"0xFF000000000000000AAE") != 0)) {
@@ -51,8 +51,8 @@ int main() {
     printf("Result: \n");
     l_dump(&n1, 'h');
 
-    printf("Shr n1 32:\n");
-    l_shift_r(&n1, ARCH/2, &n1);
+    printf("Shr n1 1:\n");
+    l_shift_r(&n1, 1, &n1);
     printf("Result: \n");
     l_dump(&n1, 'h');
 
@@ -92,7 +92,7 @@ int main() {
     printf("PowW n1 p n3 4: \n");
     l_dump(&n1, 'h');
     printf(HEX_FORMAT"\n", p);
-    l_pow_window(&n1, p, &n3, 4);
+    l_pow_window(&n1, p, 4, NULL, &n3);
     printf("Result: \n");
     l_dump(&n3, 'h');
 
@@ -101,5 +101,69 @@ int main() {
     l_free(&n3);
     l_free(&r);
     l_free(&q);
+
+
+
+    /* Modular test */
+    L_NUMBER a, a2, b, red, gcd, lcm, n, mu;
+    l_init_by_len(&gcd, 128);
+    l_init_by_len(&lcm, 128);
+    l_init_by_len(&mu, 128);
+    l_init_by_len(&a2, 128);
+    l_init_by_str(&n,  "0x00000000000000000000000FF0993949"); // Modullo
+
+    l_init_by_str(&a,  "0x00000000000000000000000F800000AB");
+    l_init_by_str(&b,  "0x000000000000000000000000200000CA");
+    l_init_by_str(&red,"0x00000000000000FFFF232323230001AA");
+
+    printf("Gcd a b gcd:\n");
+    l_dump(&a, 'h');
+    l_dump(&b, 'h');
+    m_gcd(&a, &b, &gcd);
+    printf("Result:\n");
+    l_dump(&gcd, 'h');
+
+    printf("Lcm a b lcm:\n");
+    l_dump(&a, 'h');
+    l_dump(&b, 'h');
+    m_lcm(&a, &b, &lcm);
+    printf("Result:\n");
+    l_dump(&lcm, 'h');
+
+    printf("Addm a b n a:\n");
+    l_dump(&a, 'h');
+    l_dump(&b, 'h');
+    l_dump(&n, 'h');
+    m_add(&a, &b, &n, &a2);
+    printf("Result:\n");
+    l_dump(&a2, 'h');    
+
+    printf("Preredc red.len n mu:\n");
+    m_pre_barret(red.len, &n, &mu);
+    l_dump(&mu, 'h');
+
+    printf("Redc red n mu a2:\n");
+    l_dump(&red, 'h');
+    m_redc_barret(&red, &n, &mu, &a2);
+    printf("Result:\n");
+    l_dump(&a2, 'h');
+
+    l_null(&a2);
+    printf("MulB a, b, n, a2\n");
+    l_dump(&a, 'h');
+    l_dump(&b, 'h');
+    l_dump(&n, 'h');
+
+    m_mul_blakley(&a, &b, &n, &a2);
+    l_dump(&a2, 'h');
+
+    l_null(&a2);
+    printf("Powm a, b, n, a2\n");
+    l_dump(&a, 'h');
+    l_dump(&b, 'h');
+    l_dump(&n, 'h');
+
+    m_pow(&a, &b, &n, &mu, &a2);
+    l_dump(&a2, 'h');
     return 0;
 }
