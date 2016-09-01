@@ -47,7 +47,6 @@ typedef unsigned char u8;
 typedef struct {
     WORD* words;
     u32 len;
-    u8 carry;
 } L_NUMBER;
 
 /* Section 0: Common functions */
@@ -66,7 +65,7 @@ COMMON_AR_FUNC u32 l_bit_len(const L_NUMBER* n);
 COMMON_AR_FUNC void l_null(L_NUMBER* n);
 
 /* Section 1: Standard arithmetic functions */
-LONG_AR_FUNC void l_add(const L_NUMBER* n1, const L_NUMBER* n2, L_NUMBER* res); 
+LONG_AR_FUNC int l_add(const L_NUMBER* n1, const L_NUMBER* n2, L_NUMBER* res); 
 
 LONG_AR_FUNC int l_sub(const L_NUMBER* n1, const L_NUMBER* n2, L_NUMBER* res); 
 

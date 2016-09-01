@@ -6,20 +6,18 @@ extern int l_init(L_NUMBER* n, u32 words_len);
 
 MODULAR_AR_FUNC void m_pre_barret(u32 l, const L_NUMBER* n, L_NUMBER* mu) {
 	L_NUMBER r, b, t, N;
-    l_init(&t, l+1);
+	l_init(&t, l+1);
 	l_init(&r, l+1);
 	l_init(&b, l+1); b.words[0] = 1;
 	l_init(&N, l+1); l_copy(&N, n);
 	l_shift_l(&b, l*ARCH, &b);
-	l_dump(&b, 'h');
-    l_dump(n, 'h');
 	l_div(&b, &N, &t, &r);
-    for (u32 i=0; i<mu->len; i++)
-        mu->words[i] = t.words[i];
+	for (u32 i=0; i<mu->len; i++)
+		mu->words[i] = t.words[i];
 	l_free(&b);
 	l_free(&r);
-    l_free(&N);
-    l_free(&t);
+	l_free(&N);
+	l_free(&t);
 }
 
 MODULAR_AR_FUNC void m_redc_barret(const L_NUMBER* a, const L_NUMBER* n, L_NUMBER* mu, L_NUMBER* res) {
@@ -41,8 +39,8 @@ MODULAR_AR_FUNC void m_redc_barret(const L_NUMBER* a, const L_NUMBER* n, L_NUMBE
 
 MODULAR_AR_FUNC void m_gcd(const L_NUMBER* a, const L_NUMBER* b, L_NUMBER* res) {
 	res->words[0] = 1;
-	L_NUMBER r = {0, 0, 0};
-	L_NUMBER q = {0, 0, 0};
+	L_NUMBER r = {0, 0};
+	L_NUMBER q = {0, 0};
 	L_NUMBER d;
 	L_NUMBER zero;
 	l_copy(&q, a);

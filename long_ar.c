@@ -27,7 +27,9 @@ INTERNAL_AR_FUNC static void l_mul_half_digit(const L_NUMBER* n, HALF d, L_NUMBE
     }
 }
 
-INTERNAL_AR_FUNC static u32 word_bit_len(WORD n) {
+/* Static End */
+
+INTERNAL_AR_FUNC u32 word_bit_len(WORD n) {
     u32 c = ARCH;
     while (c) {
         if ((((WORD)1 << (ARCH-1)) & n) >> (ARCH-1))
@@ -38,13 +40,10 @@ INTERNAL_AR_FUNC static u32 word_bit_len(WORD n) {
     return 0;
 }
 
-/* Static End */
-
 INTERNAL_AR_FUNC int l_init(L_NUMBER* n, u32 len) {
     n->words = (WORD*)malloc((len)*sizeof(WORD));
     memset(n->words, 0, (len)*sizeof(WORD));
     n->len = len;
-    n->carry = 0;
     return 0;
 }
 
@@ -53,7 +52,6 @@ COMMON_AR_FUNC int l_init_by_len(L_NUMBER* n, u32 len) {
     n->words = (WORD*)malloc((len)*sizeof(WORD));
     memset(n->words, 0, (len)*sizeof(WORD));
     n->len = len;
-    n->carry = 0;
     return n->len;
 }
 
@@ -127,7 +125,6 @@ COMMON_AR_FUNC int l_init_by_str(L_NUMBER* n, const char* str) {
         l_free(&a);
         l_free(&d);
     }
-    n->carry = 0;
     return 0;
 }
 
@@ -135,13 +132,11 @@ COMMON_AR_FUNC void l_copy(L_NUMBER* dest, const L_NUMBER* source) {
     u32 len = MIN(dest->len, source->len);
     if (!dest->len) {
         dest->len = source->len;
-        dest->carry = source->carry;
         dest->words = (WORD*)malloc((dest->len)*sizeof(WORD));
         len = dest->len;
     }
     for (u32 i=0; i<len; i++) {
         dest->words[i] = source->words[i];
-        dest->carry = source->carry;
     }
 }
 
@@ -155,7 +150,7 @@ COMMON_AR_FUNC void l_null(L_NUMBER* n) {
         n->words[i] = 0;
 }
 
-LONG_AR_FUNC void l_add(const L_NUMBER* n1, const L_NUMBER* n2, L_NUMBER* res) {
+LONG_AR_FUNC int l_add(const L_NUMBER* n1, const L_NUMBER* n2, L_NUMBER* res) {
     u8 carry = 0;
     WORD msb_a;
     WORD msb_b;
@@ -169,8 +164,7 @@ LONG_AR_FUNC void l_add(const L_NUMBER* n1, const L_NUMBER* n2, L_NUMBER* res) {
         else 
             carry = 0; 
     }
-    res->carry = carry;
-    res->len = n1->len; 
+    return carry;
 }
 
 LONG_AR_FUNC int l_sub(const L_NUMBER* n1, const L_NUMBER* n2, L_NUMBER* res) {
@@ -186,7 +180,6 @@ LONG_AR_FUNC int l_sub(const L_NUMBER* n1, const L_NUMBER* n2, L_NUMBER* res) {
             borrow = 1;   
         }
     }
-    res->carry = 0;
     return borrow;
 }
 
@@ -232,6 +225,7 @@ LONG_AR_FUNC void l_shift_l(const L_NUMBER* n, u32 p, L_NUMBER* res) {
     } 
     WORD buf = 0;
     p = p % ARCH;
+
     if (p)
         for (u32 i = digits; i < n->len; i++) {
             WORD cur = res->words[i];
@@ -311,8 +305,7 @@ COMMON_AR_FUNC void l_dump(const L_NUMBER* n, char format) {
             for (int i = ARCH * n->len - 1; i>=0; i--) {
                 printf("%d", (n->words[i/ARCH] & ( (WORD)1 << (i%ARCH) )) >> (i%ARCH) );
             }
-            if (n->carry)
-                printf(", Carry: 1");
+
             printf("\n");
         break;
         case 'h':
@@ -320,8 +313,7 @@ COMMON_AR_FUNC void l_dump(const L_NUMBER* n, char format) {
             for (int i=n->len-1; i>=0; i--) {
                 printf(HEX_FORMAT, n->words[i]);
             }
-            if (n->carry)
-                printf(", Carry: 1");
+
             printf("\n");
         break;
         default:
@@ -374,7 +366,7 @@ LONG_AR_FUNC void l_div(const L_NUMBER* a, const L_NUMBER* b, L_NUMBER* q, AUTO_
 LONG_AR_FUNC void l_sqr(const L_NUMBER* n, AUTO_SIZE L_NUMBER* res) { //Скр Скр Скр
     if (n != res) {
         L_NUMBER a;
-        L_NUMBER n2 = { 0, 0, 0 };
+        L_NUMBER n2 = { 0, 0 };
         l_init(&a, 2 * n->len);
         l_copy(&n2, n);
         l_mul(n, &n2, &a);
@@ -383,7 +375,7 @@ LONG_AR_FUNC void l_sqr(const L_NUMBER* n, AUTO_SIZE L_NUMBER* res) { //Скр �
         l_free(&a);
     }
     else {
-        L_NUMBER n2 = { 0, 0, 0 };
+        L_NUMBER n2 = { 0, 0 };
         l_copy(&n2, n);
         l_mul(n, &n2, res);
         l_free(&n2);
@@ -409,14 +401,12 @@ LONG_AR_FUNC void l_pow(const L_NUMBER* n, WORD p, AUTO_SIZE L_NUMBER* res) {
     l_copy(&a, n);
 
     c.words[0] = 1;
-    l_dump(&a, 'h');
     for (u32 i=0; i<k; i++) {
         if (p & (1L << i)) {
             l_mul(&c, &a, &c);
         }
         l_sqr(&a, &a);
     }
-    l_dump(&c, 'h');
     l_copy(res, &c);
     l_free(&a);
     l_free(&c);
