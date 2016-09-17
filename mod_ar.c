@@ -30,6 +30,7 @@ MODULAR_AR_FUNC void m_redc_barret(const L_NUMBER* a, const L_NUMBER* n, L_NUMBE
 	l_mul(&q, mu, &q);
 	l_shift_r(&q, ((a->len / 2) + 1)*ARCH, &q);
 	l_mul(&q, n, &q);
+
 	l_sub(a, &q, &r);
 	while (l_cmp(&r, n) != -1) {
 		l_sub(&r, n, &r);
@@ -93,11 +94,8 @@ MODULAR_AR_FUNC void m_lcm(const L_NUMBER* n1, const L_NUMBER* n2, L_NUMBER* res
 }
 
 MODULAR_AR_FUNC void m_add(const L_NUMBER* n1, const L_NUMBER* n2, const L_NUMBER* n, L_NUMBER* res) {
-	L_NUMBER q;
-	l_init(&q, res->len);
 	l_add(n1, n2, res);
-	l_div(res, n, &q, res);
-	l_free(&q);
+	l_div(res, n, NULL, res);
 }
 
 MODULAR_AR_FUNC void m_sub(const L_NUMBER* n1, const L_NUMBER* n2, const L_NUMBER* n, L_NUMBER* res) {
@@ -117,7 +115,7 @@ MODULAR_AR_FUNC void m_mul(const L_NUMBER* n1, const L_NUMBER* n2, const L_NUMBE
 
 MODULAR_AR_FUNC void m_mul_blakley(const L_NUMBER* n1, const L_NUMBER* n2, const L_NUMBER* n, L_NUMBER* res) {
     L_NUMBER r;
-    l_init(&r, res->len);
+    l_init(&r, n->len);
     u32 k = l_bit_len(n1);
     for (int i=k-1; i>=0; i--) {
         l_shift_l(&r, 1, &r);

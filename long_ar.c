@@ -171,7 +171,7 @@ LONG_AR_FUNC int l_sub(const L_NUMBER* n1, const L_NUMBER* n2, L_NUMBER* res) {
     u8 borrow = 0;
 
     for (u32 i=0; i<n1->len; i++) {
-        if (n1->words[i] >= n2->words[i] + borrow) {
+        if ((n1->words[i] >= (n2->words[i] + borrow)) && !(n2->words[i] == MAX_WORD)) {
             res->words[i] = n1->words[i] - n2->words[i] - borrow;
             borrow = 0;
         }
@@ -351,13 +351,14 @@ LONG_AR_FUNC void l_div(const L_NUMBER* a, const L_NUMBER* b, L_NUMBER* q, AUTO_
     while (l_cmp(r, b) != -1) {
         t = l_bit_len(r);
         l_shift_l(b, t-k, &c);
-        
         if (l_cmp(&c, r) == 1) {
-            l_shift_l(b, (--t)-k, &c);
+            t--;
+            l_shift_l(b, t-k, &c);
         }
+
         l_sub(r, &c, r);
         if (q)
-            q->words[(t-k)/ARCH] ^= ((WORD)1 << ((t-k)%ARCH));
+            q->words[(t-k)/ARCH] ^= (1L << ((t-k)%ARCH));
         
     }
     l_free(&c);
@@ -375,10 +376,7 @@ LONG_AR_FUNC void l_sqr(const L_NUMBER* n, AUTO_SIZE L_NUMBER* res) { //Скр �
         l_free(&a);
     }
     else {
-        L_NUMBER n2 = { 0, 0 };
-        l_copy(&n2, n);
-        l_mul(n, &n2, res);
-        l_free(&n2);
+        l_mul(n, n, res);
     }
 }
 

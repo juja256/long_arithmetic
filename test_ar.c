@@ -112,8 +112,8 @@ int main() {
     l_init_by_len(&a2, 128);
     l_init_by_str(&n,  "0x00000000000000000000000FF0993949"); // Modullo
 
-    l_init_by_str(&a,  "0x00000000000000000000000F800000AB");
-    l_init_by_str(&b,  "0x000000000000000000000000200000CA");
+    l_init_by_str(&a,  "0x0000000000000000000000FF800000AB");
+    l_init_by_str(&b,  "0x000000000000000000000FF0000000CA");
     l_init_by_str(&red,"0x00000000000000FFFF232323230001AA");
 
     printf("Gcd a b gcd:\n");
@@ -147,9 +147,18 @@ int main() {
     m_redc_barret(&red, &n, &mu, &a2);
     printf("Result:\n");
     l_dump(&a2, 'h');
+    l_null(&a2);
+
+    printf("Mul a b n mu a2\n");
+    l_dump(&a, 'h');
+    l_dump(&b, 'h');
+    l_dump(&n, 'h');
+
+    m_mul(&a, &b, &n, &mu, &a2);
+    l_dump(&a2, 'h');
 
     l_null(&a2);
-    printf("MulB a, b, n, a2\n");
+    printf("MulB a b n a2\n");
     l_dump(&a, 'h');
     l_dump(&b, 'h');
     l_dump(&n, 'h');
