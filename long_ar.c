@@ -208,10 +208,10 @@ LONG_AR_FUNC void l_mul_one_digit(const L_NUMBER* n, WORD d, L_NUMBER* res) {
 
     l_mul_half_digit(n, d1, res);
     l_mul_half_digit(n, d2, &res2);
-
+    
     l_shift_l(&res2, ARCH_2, &res2);
+    
     l_add(res, &res2, res);
-
     l_free(&res2);
 }
 
@@ -263,6 +263,7 @@ LONG_AR_FUNC void l_mul(const L_NUMBER* n1, const L_NUMBER* n2, AUTO_SIZE L_NUMB
         l_mul_one_digit(n1, n2->words[i], &tmp);
         l_shift_l(&tmp, i * ARCH, &tmp);
         l_add(&res_tmp, &tmp, &res_tmp);
+        l_null(&tmp);
     }
 
     l_copy(res, &res_tmp);
@@ -365,19 +366,16 @@ LONG_AR_FUNC void l_div(const L_NUMBER* a, const L_NUMBER* b, L_NUMBER* q, AUTO_
 }
 
 LONG_AR_FUNC void l_sqr(const L_NUMBER* n, AUTO_SIZE L_NUMBER* res) { //Скр Скр Скр
-    if (n != res) {
+    /*if (n != res) {
         L_NUMBER a;
-        L_NUMBER n2 = { 0, 0 };
         l_init(&a, 2 * n->len);
-        l_copy(&n2, n);
-        l_mul(n, &n2, &a);
+        l_mul(n, n, &a);
         l_copy(res, &a);
-        l_free(&n2);
         l_free(&a);
     }
-    else {
+    else {*/
         l_mul(n, n, res);
-    }
+    //}
 }
 
 LONG_AR_FUNC void l_pow_slow(const L_NUMBER* n, WORD p, AUTO_SIZE L_NUMBER* res) {

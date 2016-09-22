@@ -26,12 +26,18 @@ MODULAR_AR_FUNC void m_redc_barret(const L_NUMBER* a, const L_NUMBER* n, L_NUMBE
 	L_NUMBER r; 
 	l_init(&r, n->len);
 	l_copy(&q, a);
+
 	l_shift_r(&q, (S_WORD)((a->len / 2) - 1)*ARCH, &q);
+
 	l_mul(&q, mu, &q);
+
 	l_shift_r(&q, ((a->len / 2) + 1)*ARCH, &q);
+
 	l_mul(&q, n, &q);
 
-	l_sub(a, &q, &r);
+	l_sub(a, &q, &q);
+
+    l_copy(&r, &q);
 	while (l_cmp(&r, n) != -1) {
 		l_sub(&r, n, &r);
 	}
@@ -104,13 +110,19 @@ MODULAR_AR_FUNC void m_sub(const L_NUMBER* n1, const L_NUMBER* n2, const L_NUMBE
 }
 
 MODULAR_AR_FUNC void m_sqr(const L_NUMBER* a, const L_NUMBER* n, L_NUMBER* mu, L_NUMBER* res) {
-	l_sqr(a, res);
-	m_redc_barret(res, n, mu, res);
+    L_NUMBER t;
+    l_init(&t, 2*a->len);
+	l_sqr(a, &t);
+	m_redc_barret(&t, n, mu, res);
+    l_free(&t);
 }
 
 MODULAR_AR_FUNC void m_mul(const L_NUMBER* n1, const L_NUMBER* n2, const L_NUMBER* n, L_NUMBER* mu, L_NUMBER* res) {
-	l_mul(n1, n2, res);
-	m_redc_barret(res, n, mu, res);
+    L_NUMBER t;
+    l_init(&t, 2*n1->len);
+	l_mul(n1, n2, &t);
+	m_redc_barret(&t, n, mu, res);
+    l_free(&t);
 }
 
 MODULAR_AR_FUNC void m_mul_blakley(const L_NUMBER* n1, const L_NUMBER* n2, const L_NUMBER* n, L_NUMBER* res) {
@@ -131,12 +143,12 @@ MODULAR_AR_FUNC void m_mul_blakley(const L_NUMBER* n1, const L_NUMBER* n2, const
 
 MODULAR_AR_FUNC void m_pow(const L_NUMBER* x, const L_NUMBER* p, const L_NUMBER* n, L_NUMBER* mu, L_NUMBER* res) {
 	if (!mu) {
-		m_pre_barret(x->len, n, mu);
+		m_pre_barret(2*x->len, n, mu);
 	}
 	u32 k = l_bit_len(p);
     L_NUMBER a, c;
-    l_init(&c, res->len);
-    l_init(&a, res->len);
+    l_init(&c, n->len);
+    l_init(&a, n->len);
     l_copy(&a, x);
 
     c.words[0] = 1;
