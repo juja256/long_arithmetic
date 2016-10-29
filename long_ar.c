@@ -198,6 +198,7 @@ LONG_AR_FUNC int l_cmp(const L_NUMBER* n1, const L_NUMBER* n2) {
         }
         i--;
     } while(n1->words[i+1] == n2->words[i+1]);
+    return 0;
 }
 
 LONG_AR_FUNC void l_mul_one_digit(const L_NUMBER* n, WORD d, L_NUMBER* res) {
