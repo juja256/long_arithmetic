@@ -28,20 +28,22 @@ MODULAR_AR_FUNC void m_redc_barret(const L_NUMBER* a, const L_NUMBER* n, L_NUMBE
 	l_copy(&q, a);
 
 	l_shift_r(&q, (S_WORD)((a->len / 2) - 1)*ARCH, &q);
-
 	l_mul(&q, mu, &q);
-
 	l_shift_r(&q, ((a->len / 2) + 1)*ARCH, &q);
-
 	l_mul(&q, n, &q);
-
 	l_sub(a, &q, &q);
 
+	if (q.words[n->len]) {
+		l_sub(&q, n, &q);
+	} // Preventing overflow
     l_copy(&r, &q);
+
 	while (l_cmp(&r, n) != -1) {
 		l_sub(&r, n, &r);
 	}
 	l_copy(res, &r);
+    l_free(&q);
+    l_free(&r);
 }
 
 MODULAR_AR_FUNC void m_gcd(const L_NUMBER* a, const L_NUMBER* b, L_NUMBER* res) {
@@ -152,7 +154,6 @@ MODULAR_AR_FUNC void m_pow(const L_NUMBER* x, const L_NUMBER* p, const L_NUMBER*
     l_copy(&a, x);
 
     c.words[0] = 1;
-
     for (u32 i=0; i<k; i++) {
         if (p->words[i/ARCH] & (1L << (i % ARCH))) {
             m_mul(&c, &a, n, mu, &c);
