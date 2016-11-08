@@ -1,5 +1,5 @@
-GXX:= gcc
-CFLAGS:= -O3 -g
+GXX:= g++
+CFLAGS:= -O3
 
 all: test_ar test_gf
 
