@@ -21,9 +21,9 @@ MODULAR_AR_FUNC void m_pre_barret(u32 l, const L_NUMBER* n, L_NUMBER* mu) {
 }
 
 MODULAR_AR_FUNC void m_redc_barret(const L_NUMBER* a, const L_NUMBER* n, L_NUMBER* mu, L_NUMBER* res) {
-	L_NUMBER q; 
+	L_NUMBER q;
 	l_init(&q, 2*a->len);
-	L_NUMBER r; 
+	L_NUMBER r;
 	l_init(&r, n->len);
 	l_copy(&q, a);
 
@@ -68,7 +68,7 @@ MODULAR_AR_FUNC void m_gcd(const L_NUMBER* a, const L_NUMBER* b, L_NUMBER* res) 
 	}
 
 	while(l_cmp(&r, &zero)) {
-		while (!(r.words[0] & 1)) 
+		while (!(r.words[0] & 1))
 			l_shift_r(&r, 1, &r);
 		c = l_cmp(&q, &r);
 		if (c == 1) {
@@ -107,8 +107,15 @@ MODULAR_AR_FUNC void m_add(const L_NUMBER* n1, const L_NUMBER* n2, const L_NUMBE
 }
 
 MODULAR_AR_FUNC void m_sub(const L_NUMBER* n1, const L_NUMBER* n2, const L_NUMBER* n, L_NUMBER* res) {
-	l_sub(n1, n2, res);
-	l_div(res, n, NULL, res);
+	if (l_cmp(n1, n2) == 1) {
+		l_sub(n1, n2, res);
+		l_div(res, n, NULL, res);
+	}
+	else {
+		l_sub(n2, n1, res);
+		l_div(res, n, NULL, res);
+		l_sub(n, res, res);
+	}
 }
 
 MODULAR_AR_FUNC void m_sqr(const L_NUMBER* a, const L_NUMBER* n, L_NUMBER* mu, L_NUMBER* res) {
@@ -136,7 +143,7 @@ MODULAR_AR_FUNC void m_mul_blakley(const L_NUMBER* n1, const L_NUMBER* n2, const
         if (n1->words[i/ARCH] & (1L << (i%ARCH)))
             l_add(&r, n2, &r);
 
-        while (l_cmp(&r, n) != -1) 
+        while (l_cmp(&r, n) != -1)
             l_sub(&r, n, &r);
     }
     l_copy(res, &r);
