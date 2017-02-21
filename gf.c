@@ -41,9 +41,9 @@ static void p_shift_l(const GF_ELEMENT* n, u32 p, GF_ELEMENT* res) {
 }
 
 static void n_rot_l_1(const GF_ELEMENT* n, GF_ELEMENT* res) {
-    WORD k = n->words[n->len-1] & (1L << ((n->bit_len-1) % ARCH));
+    WORD k = n->words[n->len-1] & ((WORD)1 << ((n->bit_len-1) % ARCH));
     l_shift_l((const L_NUMBER*)n, 1, (L_NUMBER*)res);
-    res->words[n->len-1] &= ~(1L << (n->bit_len % ARCH));
+    res->words[n->len-1] &= ~((WORD)1 << (n->bit_len % ARCH));
     if (k)
         res->words[0] ^= 1;
 }
@@ -108,7 +108,7 @@ static void p_div(const GF_ELEMENT* a, const GF_ELEMENT* p, GF_ELEMENT* res) {
     while (k >= n) {
         p_shift_l(&P, k-n, &c);
         p_add(&t, &c, &t);
-        res->words[(k-n)/ARCH] ^= (1L << ((k-n)%ARCH));
+        res->words[(k-n)/ARCH] ^= ((WORD)1 << ((k-n)%ARCH));
         k = p_bit_len(&t);
     }
     f_free(&t);
@@ -299,8 +299,8 @@ POLYNOMIAL_BASIS void p_sqr(const GF_ELEMENT* a, const GF_ELEMENT* p, GF_ELEMENT
     GF_ELEMENT tmp;
     f_init(&tmp, 2*a->bit_len);
     for (u32 i=0; i<a->bit_len; i++) {
-        if (a->words[i/ARCH] & (1L << (i%ARCH)))
-            tmp.words[(2*i)/ARCH] ^= (1L << ((2*i)%ARCH));
+        if (a->words[i/ARCH] & ((WORD)1 << (i%ARCH)))
+            tmp.words[(2*i)/ARCH] ^= ((WORD)1 << ((2*i)%ARCH));
     }
     p_reduct(&tmp, p, res);
     f_free(&tmp);
@@ -322,7 +322,7 @@ POLYNOMIAL_BASIS void p_pow(const GF_ELEMENT* n, const GF_ELEMENT* p, const GF_E
     p_unity(n->bit_len, &c);
     f_copy(&a, n);
     for (u32 i=0; i<k; i++) {
-        if (p->words[i/ARCH] & (1L << (i%ARCH))) {
+        if (p->words[i/ARCH] & ((WORD)1 << (i%ARCH))) {
             p_mul(&c, &a, poly, &c);
         }
         p_sqr(&a, poly, &a);
@@ -389,7 +389,7 @@ NORMAL_BASIS void n_unity(u32 bit_len, GF_ELEMENT* unity) {
         unity->words[i] = (WORD)(-1);
     }
     if (t) {
-        unity->words[unity->len-1] = (1L << t) - 1;
+        unity->words[unity->len-1] = ((WORD)1 << t) - 1;
     }
 }
 
@@ -412,7 +412,7 @@ NORMAL_BASIS void n_sqr(const GF_ELEMENT* a, GF_ELEMENT* res) {
     WORD carry = a->words[0] & 1;
     l_shift_r((const L_NUMBER*)a, 1, (L_NUMBER*)&tmp);
     if (carry)
-        tmp.words[tmp.len-1] ^= (1L << ((tmp.bit_len-1) % ARCH));
+        tmp.words[tmp.len-1] ^= ((WORD)1 << ((tmp.bit_len-1) % ARCH));
     f_copy(res, &tmp);
     f_free(&tmp);
 }
@@ -455,7 +455,7 @@ NORMAL_BASIS void n_init_mul_table(u32 bit_len, u32 type, GF_ELEMENT** table_ptr
         for (u32 j=0; j<bit_len; j++) {
             if (( true_mod((two_powers[i] + two_powers[j]), p) == 1) || ( true_mod((two_powers[i] + two_powers[j]), p) == (p-1))
             || ( true_mod((two_powers[i] - two_powers[j]), p) == 1) || ( true_mod((two_powers[i] - two_powers[j]), p) == (p-1)))
-                table[i].words[(bit_len-1-j)/ARCH] ^= (1L << ((bit_len-1-j)%ARCH));
+                table[i].words[(bit_len-1-j)/ARCH] ^= ((WORD)1 << ((bit_len-1-j)%ARCH));
         }
     }
     *table_ptr = table;
@@ -476,12 +476,12 @@ NORMAL_BASIS int n_mul(const GF_ELEMENT* a, const GF_ELEMENT* b, GF_ELEMENT* tab
         for (u32 j=0; j<a->bit_len; j++) {
             n_and(&table[j], &tmp_b, &t);
             if (n_trace(&t)) {
-                tmp.words[(a->bit_len -1 - j)/ARCH] ^= (1L << ((a->bit_len -1 - j)%ARCH));
+                tmp.words[(a->bit_len -1 - j)/ARCH] ^= ((WORD)1 << ((a->bit_len -1 - j)%ARCH));
             }
         }
         n_and(&tmp_a, &tmp, &tmp);
         if (n_trace(&tmp)) {
-            tmp_res.words[(a->bit_len -1-i)/ARCH] ^= (1L << ((a->bit_len -1-i)%ARCH));
+            tmp_res.words[(a->bit_len -1-i)/ARCH] ^= ((WORD)1 << ((a->bit_len -1-i)%ARCH));
         }
         n_rot_l_1(&tmp_a, &tmp_a);
         n_rot_l_1(&tmp_b, &tmp_b);
@@ -498,7 +498,7 @@ NORMAL_BASIS void n_pow(const GF_ELEMENT* n, const GF_ELEMENT* p, GF_ELEMENT* ta
     n_unity(n->bit_len, &c);
     f_copy(&a, n);
     for (u32 i=0; i<k; i++) {
-        if (p->words[i/ARCH] & (1L << (i%ARCH))) {
+        if (p->words[i/ARCH] & ((WORD)1 << (i%ARCH))) {
             n_mul(&c, &a, table, &c);
         }
         n_sqr(&a, &a);
@@ -519,7 +519,7 @@ NORMAL_BASIS void n_inv(const GF_ELEMENT* a, GF_ELEMENT* table, GF_ELEMENT* res)
         n_pow_power_of_two(&b, k, &tmp);
         n_mul(&b, &tmp, table, &b);
         k <<= 1;
-        if (m & (1L << i)) {
+        if (m & ((WORD)1 << i)) {
             n_sqr(&b, &b);
             n_mul(&b, a, table, &b);
             k++;

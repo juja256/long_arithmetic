@@ -140,7 +140,7 @@ MODULAR_AR_FUNC void m_mul_blakley(const L_NUMBER* n1, const L_NUMBER* n2, const
     u32 k = l_bit_len(n1);
     for (int i=k-1; i>=0; i--) {
         l_shift_l(&r, 1, &r);
-        if (n1->words[i/ARCH] & (1L << (i%ARCH)))
+        if (n1->words[i/ARCH] & ((WORD)1L << (i%ARCH)))
             l_add(&r, n2, &r);
 
         while (l_cmp(&r, n) != -1)
@@ -162,7 +162,7 @@ MODULAR_AR_FUNC void m_pow(const L_NUMBER* x, const L_NUMBER* p, const L_NUMBER*
 
     c.words[0] = 1;
     for (u32 i=0; i<k; i++) {
-        if (p->words[i/ARCH] & (1L << (i % ARCH))) {
+        if (p->words[i/ARCH] & ((WORD)1L << (i % ARCH))) {
             m_mul(&c, &a, n, mu, &c);
         }
         m_sqr(&a, n, mu, &a);

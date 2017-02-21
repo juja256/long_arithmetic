@@ -360,7 +360,7 @@ LONG_AR_FUNC void l_div(const L_NUMBER* a, const L_NUMBER* b, L_NUMBER* q, AUTO_
 
         l_sub(r, &c, r);
         if (q)
-            q->words[(t-k)/ARCH] ^= (1L << ((t-k)%ARCH));
+            q->words[(t-k)/ARCH] ^= ((WORD)1L << ((t-k)%ARCH));
         
     }
     l_free(&c);
@@ -399,7 +399,7 @@ LONG_AR_FUNC void l_pow(const L_NUMBER* n, WORD p, AUTO_SIZE L_NUMBER* res) {
 
     c.words[0] = 1;
     for (u32 i=0; i<k; i++) {
-        if (p & (1L << i)) {
+        if (p & ((WORD)1L << i)) {
             l_mul(&c, &a, &c);
         }
         l_sqr(&a, &a);
