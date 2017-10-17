@@ -1,6 +1,6 @@
 
 GXX:= gcc
-CFLAGS:= -O3
+CFLAGS:= -O
 
 all: test_ar test_gf
 
@@ -9,6 +9,9 @@ test_ar: l.a test_ar.o
 
 test_gf: l.a test_gf.o
 	$(GXX) $(CFLAGS) test_gf.o l.a -o test_gf
+
+test_ar.o: test_ar.c
+	$(GXX) -c test_ar.c
 
 l.a: long_ar.o mod_ar.o gf.o
 	ar rcs l.a long_ar.o mod_ar.o gf.o

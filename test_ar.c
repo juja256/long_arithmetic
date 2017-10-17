@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "long_ar.h"
+#include <time.h>
 
 int main() {
+    {
     L_NUMBER n1;
     L_NUMBER n2;
     L_NUMBER n3;
@@ -108,13 +110,13 @@ int main() {
     L_NUMBER a, a2, b, red, gcd, lcm, n, mu;
     l_init_by_len(&gcd, 128);
     l_init_by_len(&lcm, 128);
-    l_init_by_len(&mu, 128);
+    l_init_by_len(&mu, 256);
     l_init_by_len(&a2, 128);
-    l_init_by_str(&n,  "0x00000000000000000000000FF0993949"); // Modullo
+    l_init_by_str(&n,  "0x70000000000000000000000FF0993949"); // Modullo
 
-    l_init_by_str(&a,  "0x0000000000000000000000FF800000AB");
-    l_init_by_str(&b,  "0x000000000000000000000FF0000000CA");
-    l_init_by_str(&red,"0x00000000000000FFFF232323230001AA");
+    l_init_by_str(&a,  "0xE000000000000000000000FF800000AB");
+    l_init_by_str(&b,  "0xE00000000000000000000FF0000000CA");
+    l_init_by_str(&red,"0x70000000000000FFFF232323230001AA");
 
     printf("Gcd a b gcd:\n");
     l_dump(&a, 'h');
@@ -139,7 +141,7 @@ int main() {
     l_dump(&a2, 'h');    
 
     printf("Preredc red.len n mu:\n");
-    m_pre_barret(red.len, &n, &mu);
+    m_pre_barret(2*red.len, &n, &mu);
     l_dump(&mu, 'h');
 
     printf("Redc red n mu a2:\n");
@@ -174,5 +176,39 @@ int main() {
 
     m_pow(&a, &b, &n, &mu, &a2);
     l_dump(&a2, 'h');
+    }
+    {
+        srand(0);
+        WORD n_len = 256;
+        L_NUMBER a,b,c={0,0}, d={0,0};
+        l_init(&a, n_len); // 2048
+        for (unsigned i=0;i<a.len; i++)
+            a.words[i] = (u64)rand() << 32 | (u64)rand();
+        l_init(&b, n_len); // 2048
+        for (unsigned i=0;i<a.len; i++)
+            b.words[i] = (u64)rand() << 32 | (u64)rand();
+
+        clock_t begin = clock();
+        for (u32 i=0; i<0xFFF; i++) {
+            l_mul_karatsuba(&a, &b, &c);
+        }
+        clock_t end = clock();
+        printf("Karatsuba(%d) mul time: %lf\n",n_len*ARCH, (double)(end-begin)/CLOCKS_PER_SEC ) ;
+
+        begin = clock();
+        for (u32 i=0; i<0xFFF; i++) {
+            l_mul(&a, &b, &d);
+        }
+        end = clock();
+        printf("Ordinary(%d) mul time: %lf\n\n",n_len*ARCH, (double)(end-begin)/CLOCKS_PER_SEC ) ;
+
+        l_dump(&a, 'h');
+        l_dump(&b, 'h');
+        printf("Karatsuba mul res:\n");
+        l_dump(&c, 'h');
+        printf("Ord mul res:\n");
+        l_dump(&d, 'h');
+
+    }
     return 0;
 }

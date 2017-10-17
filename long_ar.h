@@ -41,7 +41,7 @@ typedef unsigned char u8;
     #define MAX_WORD ((u64)(-1))
     #define HEX_FORMAT "%.16llX"
 #else
-    #error "Unknown word lenghth!"
+#error "Unknown word length!"
 #endif
 
 typedef struct {
@@ -50,13 +50,15 @@ typedef struct {
 } L_NUMBER;
 
 /* Section 0: Common functions */
+COMMON_AR_FUNC int l_init(L_NUMBER* n, u32 len);
+
 COMMON_AR_FUNC int l_init_by_len(L_NUMBER* n, u32 bit_len);
 
-COMMON_AR_FUNC int l_init_by_str(L_NUMBER* n, const char* str); 
+COMMON_AR_FUNC int l_init_by_str(L_NUMBER* n, const char* str);
 
 COMMON_AR_FUNC void l_copy(L_NUMBER* dest, const L_NUMBER* source);
 
-COMMON_AR_FUNC void l_free(L_NUMBER* n); 
+COMMON_AR_FUNC void l_free(L_NUMBER* n);
 
 COMMON_AR_FUNC void l_dump(const L_NUMBER* n, char format);
 
@@ -65,19 +67,21 @@ COMMON_AR_FUNC u32 l_bit_len(const L_NUMBER* n);
 COMMON_AR_FUNC void l_null(L_NUMBER* n);
 
 /* Section 1: Standard arithmetic functions */
-LONG_AR_FUNC int l_add(const L_NUMBER* n1, const L_NUMBER* n2, L_NUMBER* res); 
+LONG_AR_FUNC int l_add(const L_NUMBER* n1, const L_NUMBER* n2, L_NUMBER* res);
 
-LONG_AR_FUNC int l_sub(const L_NUMBER* n1, const L_NUMBER* n2, L_NUMBER* res); 
+LONG_AR_FUNC int l_sub(const L_NUMBER* n1, const L_NUMBER* n2, L_NUMBER* res);
 
-LONG_AR_FUNC int l_cmp(const L_NUMBER* n1, const L_NUMBER* n2); 
+LONG_AR_FUNC int l_cmp(const L_NUMBER* n1, const L_NUMBER* n2);
 
-LONG_AR_FUNC void l_mul_one_digit(const L_NUMBER* n, WORD d, L_NUMBER* res); 
+LONG_AR_FUNC void l_mul_one_digit(const L_NUMBER* n, WORD d, L_NUMBER* res);
 
-LONG_AR_FUNC void l_shift_l(const L_NUMBER* n, u32 digits, L_NUMBER* res); 
+LONG_AR_FUNC void l_shift_l(const L_NUMBER* n, u32 digits, L_NUMBER* res);
 
-LONG_AR_FUNC void l_shift_r(const L_NUMBER* n, u32 digits, L_NUMBER* res); 
+LONG_AR_FUNC void l_shift_r(const L_NUMBER* n, u32 digits, L_NUMBER* res);
 
-LONG_AR_FUNC void l_mul(const L_NUMBER* n1, const L_NUMBER* n2, AUTO_SIZE L_NUMBER* res); 
+LONG_AR_FUNC void l_mul(const L_NUMBER* n1, const L_NUMBER* n2, AUTO_SIZE L_NUMBER* res);
+
+LONG_AR_FUNC void l_mul_karatsuba(const L_NUMBER* n1, const L_NUMBER* n2, AUTO_SIZE L_NUMBER* res);
 
 LONG_AR_FUNC void l_div(const L_NUMBER* n1, const L_NUMBER* n2, L_NUMBER* q, AUTO_SIZE L_NUMBER* r);
 
