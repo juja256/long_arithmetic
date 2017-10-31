@@ -61,7 +61,7 @@ Z2N1_AR_FUNCTION void z2n1_mul_by_two_power(const L_NUMBER* n, WORD ex, L_NUMBER
 	if (r) {
 		L_NUMBER tmp;
 		l_init(&tmp, 2*n->len);
-		l_shift_l(n, r, &tmp);
+		l_shift_l(res, r, &tmp);
 		z2n1_normalize(&tmp, (n->len - 1), res);
 	}
 }
@@ -183,14 +183,14 @@ Z2N1_AR_FUNCTION void z2n1_dft_ordinary(L_NUMBER* inp, WORD K, L_NUMBER* out) {
 	l_init(&W, N+1);
 	for (u32 i=0; i<K; i++) {
 		for (u32 j=0; j<K; j++) {
-			printf("mul inp[%d] 2^%d W\n", j, 2*(N*ARCH)*i*j/K);
-			l_dump(&(inp[j]), 'h');
+			//printf("mul inp[%d] 2^%d W\n", j, 2*(N*ARCH)*i*j/K);
+			//l_dump(&(inp[j]), 'h');
 			z2n1_mul_by_two_power(&(inp[j]), 2*(N*ARCH)*i*j/K, &W );
-			l_dump(&W, 'h');
-			printf("add out[%d] W out[%d]\n", i, i);
-			l_dump(&out[i], 'h');
+			//l_dump(&W, 'h');
+			//printf("add out[%d] W out[%d]\n", i, i);
+			//l_dump(&out[i], 'h');
 			z2n1_add( &(out[i]), &W, &(out[i]) );
-			l_dump(&out[i], 'h');
+			//l_dump(&out[i], 'h');
 		}
 	}
 	l_free(&W);
@@ -206,7 +206,11 @@ Z2N1_AR_FUNCTION void z2n1_dft_inv_ordinary(L_NUMBER* inp, WORD K, L_NUMBER* out
 			z2n1_div_by_two_power(&(inp[j]), 2*(N*ARCH)*i*j/K, &W );
 			z2n1_add( &(out[i]), &W, &(out[i]) );
 		}
+		//printf("div out[%d] by 2 power: %d\n", i, k);
+		//l_dump(&out[i], 'h');
 		z2n1_div_by_two_power(&(out[i]), k, &(out[i]) );
+		//l_dump(&out[i], 'h');
+
 	}
 	l_free(&W);
 }
@@ -267,6 +271,6 @@ LONG_AR_FUNC void l_mul_shonhage_strassen(const L_NUMBER* n1, const L_NUMBER* n2
 	free(outA);
 	free(outB);
 
-	z2n1_destroy_base(N);
+	z2n1_destroy_base();
 	l_copy(res, &r);
 }

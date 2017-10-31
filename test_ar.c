@@ -266,10 +266,12 @@ int main() {
         z2n1_mul_by_two_power(&b, 64+64, &b);
         l_dump(&b, 'h');
 
-        L_NUMBER bb[8] = {{0,0}};
+        L_NUMBER bb[8] =  {{0,0}};
+        L_NUMBER bb2[8] = {{0,0}};
         L_NUMBER out[8] = {{0,0}};
         for (u32 i=0;i<8;i++){
           l_init(&bb[i], N+1);
+          l_init(&bb2[i], N+1);
           l_init(&out[i], N+1);
           bb[i].words[0] = (u64)rand() << 32 | (u64)rand();
           printf("bb[%d]:\n", i);
@@ -280,10 +282,10 @@ int main() {
           printf("dft_ordinary[%d]:\n", i);
           l_dump(&out[i], 'h');
         }
-        z2n1_dft_inv_ordinary(out, 8, bb);
+        z2n1_dft_inv_ordinary(out, 8, bb2);
         for (u32 i=0;i<8;i++) {
           printf("dft_inv_ordinary[%d]:\n", i);
-          l_dump(&bb[i], 'h');
+          l_dump(&bb2[i], 'h');
         }
 
         z2n1_fft(bb, 8, out);
