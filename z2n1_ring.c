@@ -88,7 +88,7 @@ Z2N1_AR_FUNCTION void z2n1_add(const L_NUMBER* n1, const L_NUMBER* n2, L_NUMBER*
 	}
 }
 
-Z2N1_AR_FUNCTION void zn21_sub(const L_NUMBER* n1, const L_NUMBER* n2, L_NUMBER* res) {
+Z2N1_AR_FUNCTION void z2n1_sub(const L_NUMBER* n1, const L_NUMBER* n2, L_NUMBER* res) {
 	WORD N = n1->len-1;
 	L_NUMBER tmp; l_init(&tmp, N+1);
 	l_sub(&base, n2, &tmp);
@@ -102,15 +102,12 @@ static void _z2n1_fft(L_NUMBER* inp, L_NUMBER* out, L_NUMBER* W, WORD K, WORD N,
 		_z2n1_fft(out,   inp,   W, K, N, 2*s);
 		_z2n1_fft(out+s, inp+s, W, K, N, 2*s);
 		WORD t;
-		printf("s = %d\n", s);
 		for (int i = 0; i < K; i += 2 * s) {
-			t = 2*(N*ARCH)*i/K;
+			t = (N*ARCH)*i/K;
 			z2n1_mul_by_two_power(&(out[i+s]), t, W);
-			printf("%d, %d: W: ", i, t); l_dump(W, 'h');
 			z2n1_add(&(out[i]), W, &(inp[i/2])    );
-			zn21_sub(&(out[i]), W, &(inp[i/2+K/2]));
+			z2n1_sub(&(out[i]), W, &(inp[i/2+K/2]));
 		}
-		printf("\n\n");
 	}
 }
 
@@ -120,60 +117,65 @@ static void _z2n1_fft_inv(L_NUMBER* inp, L_NUMBER* out, L_NUMBER* W, WORD K, WOR
 		_z2n1_fft_inv(out+s, inp+s, W, K, N, 2*s);
 		WORD t;
 		for (int i = 0; i < K; i += 2 * s) {
-			t = 2*(N*ARCH)*i/K;
+			t = (N*ARCH)*i/K;
 			z2n1_div_by_two_power(&(out[i+s]), t, W);
 			z2n1_add(&(out[i]), W, &(inp[i/2])    );
-			zn21_sub(&(out[i]), W, &(inp[i/2+K/2]));
+			z2n1_sub(&(out[i]), W, &(inp[i/2+K/2]));
 		}
 	}
 }
 
-Z2N1_AR_FUNCTION void z2n1_fft(L_NUMBER* inp, WORD K, L_NUMBER* out) {
+Z2N1_AR_FUNCTION void z2n1_fft(L_NUMBER* inp, L_NUMBER* _mem, WORD K) {
+
 	for (u32 i=0;i<K;i++)
-		l_copy(&(out[i]), &(inp[i]));
+		l_copy(&(_mem[i]), &(inp[i]));
+
 	WORD N = inp[0].len-1;
 	L_NUMBER W; l_init(&W, N+1);
-	_z2n1_fft(inp, out, &W, K, N, 1);
+	_z2n1_fft(inp, _mem, &W, K, N, 1);
+
 	l_free(&W);
+
 }
 
-Z2N1_AR_FUNCTION void z2n1_fft_inv(L_NUMBER* inp, WORD K, L_NUMBER* out) {
+Z2N1_AR_FUNCTION void z2n1_fft_inv(L_NUMBER* inp, L_NUMBER* _mem, WORD K) {
+
 	WORD k = word_bit_len(K)-1;
 	for (u32 i=0;i<K;i++)
-		l_copy(&(out[i]), &(inp[i]));
+		l_copy(&(_mem[i]), &(inp[i]));
 	WORD N = inp[0].len-1;
 	L_NUMBER W; l_init(&W, N+1);
-	_z2n1_fft_inv(inp, out, &W, K, N, 1);
+	_z2n1_fft_inv(inp, _mem, &W, K, N, 1);
 	for (u32 i=0; i<K; i++) {
-		z2n1_div_by_two_power(&(out[i]), k, &(out[i]));
+		z2n1_div_by_two_power(&(inp[i]), k, &(inp[i]));
 	}
 	l_free(&W);
 }
 
-Z2N1_AR_FUNCTION void z2n1_weighted_fft(L_NUMBER* inp, WORD K, L_NUMBER* out) {
+Z2N1_AR_FUNCTION void z2n1_weighted_fft(L_NUMBER* inp, L_NUMBER* _mem, WORD K) {
 	WORD N = inp[0].len-1;
 	for (u32 i=0;i<K;i++) {
 		z2n1_mul_by_two_power(&(inp[i]), (N*ARCH)*i/K, &(inp[i]));
-		l_copy(&(out[i]), &(inp[i]));
+		l_copy(&(_mem[i]), &(inp[i]));
 	}
 
 	L_NUMBER W; l_init(&W, N+1);
-	_z2n1_fft(inp, out, &W, K, N, 1);
+	_z2n1_fft(inp, _mem, &W, K, N, 1);
 	l_free(&W);
 }
 
-Z2N1_AR_FUNCTION void z2n1_weighted_fft_inv(L_NUMBER* inp, WORD K, L_NUMBER* out) {
+Z2N1_AR_FUNCTION void z2n1_weighted_fft_inv(L_NUMBER* inp, L_NUMBER* _mem, WORD K) {
 	WORD N = inp[0].len-1;
 	WORD k = word_bit_len(K)-1;
 	for (u32 i=0;i<K;i++) {
-		l_copy(&(out[i]), &(inp[i]));
+		l_copy(&(_mem[i]), &(inp[i]));
 	}
 
 	L_NUMBER W; l_init(&W, N+1);
-	_z2n1_fft_inv(inp, out, &W, K, N, 1);
+	_z2n1_fft_inv(inp, _mem, &W, K, N, 1);
 	l_free(&W);
 	for (u32 i=0;i<K;i++) {
-		z2n1_div_by_two_power(&(out[i]), (N*ARCH)*i/K + k, &(out[i]));
+		z2n1_div_by_two_power(&(inp[i]), (N*ARCH)*i/K + k, &(inp[i]));
 	}
 }
 
@@ -183,14 +185,8 @@ Z2N1_AR_FUNCTION void z2n1_dft_ordinary(L_NUMBER* inp, WORD K, L_NUMBER* out) {
 	l_init(&W, N+1);
 	for (u32 i=0; i<K; i++) {
 		for (u32 j=0; j<K; j++) {
-			//printf("mul inp[%d] 2^%d W\n", j, 2*(N*ARCH)*i*j/K);
-			//l_dump(&(inp[j]), 'h');
 			z2n1_mul_by_two_power(&(inp[j]), 2*(N*ARCH)*i*j/K, &W );
-			//l_dump(&W, 'h');
-			//printf("add out[%d] W out[%d]\n", i, i);
-			//l_dump(&out[i], 'h');
 			z2n1_add( &(out[i]), &W, &(out[i]) );
-			//l_dump(&out[i], 'h');
 		}
 	}
 	l_free(&W);
@@ -206,16 +202,12 @@ Z2N1_AR_FUNCTION void z2n1_dft_inv_ordinary(L_NUMBER* inp, WORD K, L_NUMBER* out
 			z2n1_div_by_two_power(&(inp[j]), 2*(N*ARCH)*i*j/K, &W );
 			z2n1_add( &(out[i]), &W, &(out[i]) );
 		}
-		//printf("div out[%d] by 2 power: %d\n", i, k);
-		//l_dump(&out[i], 'h');
 		z2n1_div_by_two_power(&(out[i]), k, &(out[i]) );
-		//l_dump(&out[i], 'h');
-
 	}
 	l_free(&W);
 }
 
-LONG_AR_FUNC void l_mul_shonhage_strassen(const L_NUMBER* n1, const L_NUMBER* n2, AUTO_SIZE L_NUMBER* res) {
+LONG_AR_FUNC double l_mul_shonhage_strassen(const L_NUMBER* n1, const L_NUMBER* n2, AUTO_SIZE L_NUMBER* res) {
 	WORD Nbit = n1->len*ARCH;
 	WORD logNbits = word_bit_len(Nbit) - 1;
 	WORD k = (logNbits >> 1) + 1;
@@ -226,14 +218,15 @@ LONG_AR_FUNC void l_mul_shonhage_strassen(const L_NUMBER* n1, const L_NUMBER* n2
 	WORD M = (Nbit >> k)/ARCH;
 	L_NUMBER* bufA = malloc(sizeof(L_NUMBER)*K);
 	L_NUMBER* bufB = malloc(sizeof(L_NUMBER)*K);
-	L_NUMBER* outA = malloc(sizeof(L_NUMBER)*K);
-	L_NUMBER* outB = malloc(sizeof(L_NUMBER)*K);
-
+	L_NUMBER* mem = malloc(sizeof(L_NUMBER)*K);
+	double eff = ((2.0*Nbit / K) + k) / n;
+	printf("n: %d\nK: %d\nM: %d\n", n, K, M*ARCH);
 	for (u32 i=0; i<K; i++) {
-		outA[i].words = 0; outA[i].len = 0;
-		outB[i].words = 0; outB[i].len = 0;
+		bufA[i].words = 0; bufA[i].len = 0;
+		bufB[i].words = 0; bufB[i].len = 0;
 		l_init(&(bufA[i]), N+1);
 		l_init(&(bufB[i]), N+1);
+		l_init(&(mem[i]), N+1);
 		L_NUMBER curA = {n1->words+i*M, M};
 		L_NUMBER curB = {n2->words+i*M, M};
 		l_copy(&(bufA[i]), &curA);
@@ -241,36 +234,44 @@ LONG_AR_FUNC void l_mul_shonhage_strassen(const L_NUMBER* n1, const L_NUMBER* n2
 	}
 
 	/* Applying weighted DFT */
-	z2n1_weighted_fft(bufA, K, outA);
-	z2n1_weighted_fft(bufB, K, outB);
+	z2n1_weighted_fft(bufA, mem, K);
+	z2n1_weighted_fft(bufB, mem, K);
 
 	/* Negacyclic convolution */
 	for (u32 i=0; i<K; i++) {
-		z2n1_mul( &(outA[i]), &(outB[i]), &(outA[i]) );
+		z2n1_mul( &(bufA[i]), &(bufB[i]), &(bufA[i]) );
 	}
 
 	/* Applying inverse weighted DFT */
-	z2n1_weighted_fft_inv(outA, K, bufA);
+	z2n1_weighted_fft_inv(bufA, mem, K);
 
 	/* Recompose (glucks present definetely) */
 	L_NUMBER r = {0,0};
-	l_init(&r, 2*n1->len);
+
+	if (res->len == 0) {
+		l_init(&r, 2*n1->len);
+		*res = r;
+	}
 
 	for (u32 i=0; i<K; i++) {
+		printf("C[%i]: ", i);
+		l_dump(&bufA[i], 'h');
 		L_NUMBER prt1 = {r.words+i*M, 2*M+k};
 		L_NUMBER prt2 = {bufA[i].words, 2*M+k};
-		l_add(&prt1, &prt2, &prt1);
+		//l_add(&prt1, &prt2, &prt1);
 
 		l_free(&(bufA[i]));
 		l_free(&(bufB[i]));
-		l_free(&(outA[i]));
-		l_free(&(outB[i]));
+		l_free(&(mem[i]));
 	}
 	free(bufA);
 	free(bufB);
-	free(outA);
-	free(outB);
+	free(mem);
 
 	z2n1_destroy_base();
-	l_copy(res, &r);
+
+	if (res->len != 0) {
+		l_copy(res, &r);
+	}
+	return eff;
 }

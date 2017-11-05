@@ -94,7 +94,7 @@ LONG_AR_FUNC void l_mul(const L_NUMBER* n1, const L_NUMBER* n2, AUTO_SIZE L_NUMB
 
 LONG_AR_FUNC void l_mul_karatsuba(const L_NUMBER* n1, const L_NUMBER* n2, AUTO_SIZE L_NUMBER* res);
 
-LONG_AR_FUNC void l_mul_shonhage_strassen(const L_NUMBER* n1, const L_NUMBER* n2, AUTO_SIZE L_NUMBER* res);
+LONG_AR_FUNC double l_mul_shonhage_strassen(const L_NUMBER* n1, const L_NUMBER* n2, AUTO_SIZE L_NUMBER* res);
 
 LONG_AR_FUNC void l_div(const L_NUMBER* n1, const L_NUMBER* n2, L_NUMBER* q, AUTO_SIZE L_NUMBER* r);
 
@@ -134,7 +134,7 @@ Z2N1_AR_FUNCTION void z2n1_destroy_base();
 
 Z2N1_AR_FUNCTION void z2n1_add(const L_NUMBER* n1, const L_NUMBER* n2, L_NUMBER* res);
 
-Z2N1_AR_FUNCTION void zn21_sub(const L_NUMBER* n1, const L_NUMBER* n2, L_NUMBER* res);
+Z2N1_AR_FUNCTION void z2n1_sub(const L_NUMBER* n1, const L_NUMBER* n2, L_NUMBER* res);
 
 Z2N1_AR_FUNCTION void z2n1_normalize(const L_NUMBER* n, WORD N, L_NUMBER* res);
 
@@ -144,13 +144,13 @@ Z2N1_AR_FUNCTION void z2n1_mul_by_two_power(const L_NUMBER* n, WORD ex, L_NUMBER
 
 Z2N1_AR_FUNCTION void z2n1_div_by_two_power(const L_NUMBER* n, WORD ex, L_NUMBER* res);
 
-Z2N1_AR_FUNCTION void z2n1_weighted_fft(L_NUMBER* inp, WORD K, L_NUMBER* out);
+Z2N1_AR_FUNCTION void z2n1_weighted_fft(L_NUMBER* buf, L_NUMBER* _mem, WORD K);
 
-Z2N1_AR_FUNCTION void z2n1_weighted_fft_inv(L_NUMBER* inp, WORD K, L_NUMBER* out);
+Z2N1_AR_FUNCTION void z2n1_weighted_fft_inv(L_NUMBER* buf, L_NUMBER* _mem, WORD K);
 
-Z2N1_AR_FUNCTION void z2n1_fft(L_NUMBER* inp, WORD K, L_NUMBER* out);
+Z2N1_AR_FUNCTION void z2n1_fft(L_NUMBER* buf, L_NUMBER* _mem, WORD K);
 
-Z2N1_AR_FUNCTION void z2n1_fft_inv(L_NUMBER* inp, WORD K, L_NUMBER* out);
+Z2N1_AR_FUNCTION void z2n1_fft_inv(L_NUMBER* buf, L_NUMBER* _mem, WORD K);
 
 Z2N1_AR_FUNCTION void z2n1_dft_ordinary(L_NUMBER* inp, WORD K, L_NUMBER* out);
 
