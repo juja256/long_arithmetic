@@ -211,7 +211,7 @@ LONG_AR_FUNC int l_sub(const L_NUMBER* n1, const L_NUMBER* n2, L_NUMBER* res) {
     u8 borrow = 0;
 
     for (u32 i=0; i<n1->len; i++) {
-        if ((n1->words[i] >= (n2->words[i] + borrow)) && !(n2->words[i] == MAX_WORD)) {
+        if ((n1->words[i] >= (n2->words[i] + borrow)) && ( (n2->words[i] != MAX_WORD) || (n1->words[i] == MAX_WORD))) {
             res->words[i] = n1->words[i] - n2->words[i] - borrow;
             borrow = 0;
         }
