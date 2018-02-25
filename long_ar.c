@@ -208,17 +208,13 @@ LONG_AR_FUNC int l_propagate_carry(L_NUMBER* n) {
 }
 
 LONG_AR_FUNC int l_sub(const L_NUMBER* n1, const L_NUMBER* n2, L_NUMBER* res) {
-    u8 borrow = 0;
+    WORD borrow = 0;
 
-    for (u32 i=0; i<n1->len; i++) {
-        if ((n1->words[i] >= (n2->words[i] + borrow)) && ( (n2->words[i] != MAX_WORD) || (n1->words[i] == MAX_WORD))) {
-            res->words[i] = n1->words[i] - n2->words[i] - borrow;
-            borrow = 0;
-        }
-        else {
-            res->words[i] = (MAX_WORD + (n1->words[i] - n2->words[i] - borrow)) + 1;
-            borrow = 1;
-        }
+    for (int i=0; i<n1->len; i++) {
+        WORD t_a = n1->words[i];
+        WORD t_b = n2->words[i];
+        res->words[i] = t_a - t_b - borrow;
+        borrow = ( (~t_a) & (res->words[i] | t_b) | (res->words[i] & t_b) ) >> (ARCH-1);
     }
     return borrow;
 }
