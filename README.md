@@ -7,10 +7,10 @@ Classical long arithmetic and Galois field realisation in C.
 
 
 To run test_exeter_lib.c:
-1)install gmp,openssl libs:
-1.1)gmp:     sudo apt-get install libgmp3-dev
-1.2)openssl: sudo apt-get install libssl-dev
-2)compile: gcc test_extern_lib.c -o <exe_name> -lgmp -lssl -lcrypto
-3)help: run ./<exe_name>
+1.   install gmp,openssl libs:
+   - gmp:     sudo apt-get install libgmp3-dev;
+   - openssl: sudo apt-get install libssl-dev;
+2.   compile: gcc test_extern_lib.c -o <exe_name> -lgmp -lssl -lcrypto;
+3.   help:    run ./<exe_name>
 
   
