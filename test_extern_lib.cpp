@@ -2,7 +2,9 @@
 #include <stdlib.h>
 #include <gmp.h>
 #include <openssl/bn.h>
+#include <NTL/ZZ.h>
 
+using namespace NTL;
 
 int main(int argc, char* argv[])
 {
@@ -11,16 +13,18 @@ int main(int argc, char* argv[])
             printf("* Test external long arithmetic libs *\n");
             // argv[2] = <number_lib> | arg[3] = <number_1> | arg[4] = <number_2> | arg[5] = base 
             printf("Usage: ./execute_program_name <number_lib> <number_1> <number_2> <base>\n");
-            printf("where: <number_lib> = [GMP=1, OpenSSL=2, Other=3]\n");
+            printf("where: <number_lib> = [GMP=1, OpenSSL=2, NTL=3, Other=4]\n");
             printf("for OpenSSL <base>  = [10, 16]\n");
-        //  printf("Existing multiplication algorithm: \n");
-        //  printf("for GMP : Karatsuba, FFT\n");
-        //  printf("for Openssl : Karatsuba\n");
+            printf("for NTL <base>  = [10]\n");
+            printf("Existing multiplication algorithm: \n");
+            printf("for GMP(automatically choosing) : basecase, Karatsuba, Tom-Cook, FFT\n");
+            printf("for Openssl : Karatsuba\n");
+            printf("for NTL: Karatsuba\n");
             printf("Example: \n\n");
-            printf("> ./test_ext_libs A45E 34DE 16\n");
-            printf("  -- multiply two hexadecimal numbers: A45E & 34DE\n");
-            printf("> ./test_ext_libs 10 10 2\n");
-            printf("  -- multiply two binary numbers: 10 & 10\n");
+            printf("> ./test_ext_libs 2 A45E 34DE 16\n");
+            printf("  -- multiply two hexadecimal numbers: A45E & 34DE with Openssl lib\n");
+            printf("> ./test_ext_libs 1 10 10 2\n");
+            printf("  -- multiply two binary numbers: 10 & 10 with GMP lib\n");
             return -1;
         }
     else if(atoi(argv[1])==1)
@@ -70,7 +74,15 @@ int main(int argc, char* argv[])
     }
     else if(atoi(argv[1])==3)
     {
-        // other
+        ZZ a = conv<ZZ>(argv[2]);
+        ZZ b = conv<ZZ>(argv[3]);
+        ZZ r = a*b;
+        std::cout << r << std::endl;
+        return 0;
+    }
+    else if(atoi(argv[1])==4)
+    {
+        // other lib
         return 0;
     }
     else 
