@@ -6,12 +6,12 @@ Classical long arithmetic and Galois field realisation in C.
   - Library provides module for operating in finite Galois fields of characteristic 2. Polynomial and Normal basises are supported, however normal basis is bit slowly than polynomial.
 
 
-To run test_extern_lib.c:
+To run test_extern_lib.cpp:
 1.   install gmp,openssl libs:
    - gmp:     sudo apt-get install libgmp3-dev;
    - openssl: sudo apt-get install libssl-dev;
    - ntl:     http://www.shoup.net/ntl/doc/tour-unix.html
-2.   compile: g++ -g -O2 test_extern_lib.c -o <exe_name> -lgmp -lssl -lcrypto -lntl -lm;
+2.   compile: g++ -g -O2 test_extern_lib.cpp -o <exe_name> -lgmp -lssl -lcrypto -lntl -lm;
 3.   help:    run ./<exe_name>
 
   
