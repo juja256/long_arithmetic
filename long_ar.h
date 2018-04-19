@@ -14,6 +14,8 @@ extern "C" {
 
 #define ARCH 64
 
+//#define DEBUG
+
 typedef unsigned int u32;
 typedef unsigned short u16;
 typedef unsigned long long u64;
@@ -136,7 +138,7 @@ Z2N1_AR_FUNCTION void z2n1_add(const L_NUMBER* n1, const L_NUMBER* n2, L_NUMBER*
 
 Z2N1_AR_FUNCTION void z2n1_sub(const L_NUMBER* n1, const L_NUMBER* n2, L_NUMBER* res);
 
-Z2N1_AR_FUNCTION void z2n1_normalize(const L_NUMBER* n, WORD N, L_NUMBER* res);
+Z2N1_AR_FUNCTION void z2n1_normalize(const L_NUMBER* n, L_NUMBER* res);
 
 Z2N1_AR_FUNCTION void z2n1_mul(const L_NUMBER* n1, const L_NUMBER* n2, L_NUMBER* res);
 
