@@ -222,6 +222,7 @@ LONG_AR_FUNC double l_mul_shonhage_strassen(const L_NUMBER* n1, const L_NUMBER* 
 	#ifdef DEBUG
 	printf("n: %d\nK: %d\nM: %d\n", n, K, M*ARCH);
 	#endif
+	/* Decompose stage */
 	for (u32 i=0; i<K/2; i++) {
 		bufA[i].words = 0; bufA[i].len = 0;
 		bufB[i].words = 0; bufB[i].len = 0;
@@ -266,7 +267,7 @@ LONG_AR_FUNC double l_mul_shonhage_strassen(const L_NUMBER* n1, const L_NUMBER* 
 	/* Applying inverse weighted DFT */
 	z2n1_weighted_fft_inv(bufA, mem, K);
 
-	/* Recompose (glucks present definetely) */
+	/* Recompose stage */
 	L_NUMBER r = {0,0};
 
 	l_init(&r, 2*n1->len);
@@ -289,9 +290,6 @@ LONG_AR_FUNC double l_mul_shonhage_strassen(const L_NUMBER* n1, const L_NUMBER* 
 		l_free(&(bufB[i]));
 		l_free(&(mem[i]));
 	}
-
-	
-
 	free(bufA);
 	free(bufB);
 	free(mem);
