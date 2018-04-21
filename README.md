@@ -8,7 +8,7 @@ Classical long arithmetic and Galois fields realisation in C.
 
 
 To run test_extern_lib.cpp:
-1.   install gmp,openssl libs:
+1.   install gmp,openssl,ntl libs:
    - gmp:     sudo apt-get install libgmp3-dev;
    - openssl: sudo apt-get install libssl-dev;
    - ntl:     http://www.shoup.net/ntl/doc/tour-unix.html
