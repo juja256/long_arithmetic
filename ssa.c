@@ -3,17 +3,21 @@
 #include <stdlib.h>
 
 static L_NUMBER base;
+static L_NUMBER zero;
 
 Z2N1_AR_FUNCTION void z2n1_init_base(WORD N) {
 	l_init(&base, N+1);
+	l_init(&zero, N+1);
 	base.words[0]=1; base.words[N]=1;
 }
 
 Z2N1_AR_FUNCTION void z2n1_destroy_base() {
 	l_free(&base);
+	l_free(&zero);
 }
 
-Z2N1_AR_FUNCTION void z2n1_normalize(const L_NUMBER* n, WORD N, L_NUMBER* res) { // || n || >= 2N
+Z2N1_AR_FUNCTION void z2n1_normalize(const L_NUMBER* n, L_NUMBER* res) { // || n || >= 2N
+	WORD N = base.len - 1;
 	L_NUMBER norm={0,0};
 	l_init(&norm, N+1);
 	WORD m = n->len - N;
@@ -39,20 +43,22 @@ Z2N1_AR_FUNCTION void z2n1_normalize(const L_NUMBER* n, WORD N, L_NUMBER* res) {
 	}
 
 	l_copy(res, &norm);
+
 	l_free(&norm);
 }
 
 Z2N1_AR_FUNCTION void z2n1_mul(const L_NUMBER* n1, const L_NUMBER* n2, L_NUMBER* res) {
 	L_NUMBER tmp = {0,0};
 	l_mul(n1, n2, &tmp);
-	z2n1_normalize(&tmp, n1->len-1, res);
+	z2n1_normalize(&tmp, res);
+	l_free(&tmp);
 }
 
 Z2N1_AR_FUNCTION void z2n1_mul_by_two_power(const L_NUMBER* n, WORD ex, L_NUMBER* res) {
 	WORD Nbits = (n->len - 1)*ARCH;
 	WORD q = ex / Nbits;
 	WORD r = ex % Nbits;
-	if (q%2) {
+	if ((q%2 == 1) && (l_cmp(&zero, n) != 0)) {
 		l_sub(&base, n, res);
 	}
 	else {
@@ -62,7 +68,8 @@ Z2N1_AR_FUNCTION void z2n1_mul_by_two_power(const L_NUMBER* n, WORD ex, L_NUMBER
 		L_NUMBER tmp;
 		l_init(&tmp, 2*n->len);
 		l_shift_l(res, r, &tmp);
-		z2n1_normalize(&tmp, (n->len - 1), res);
+		z2n1_normalize(&tmp, res);
+		l_free(&tmp);
 	}
 }
 
@@ -75,16 +82,8 @@ Z2N1_AR_FUNCTION void z2n1_div_by_two_power(const L_NUMBER* n, WORD ex, L_NUMBER
 Z2N1_AR_FUNCTION void z2n1_add(const L_NUMBER* n1, const L_NUMBER* n2, L_NUMBER* res) {
 	WORD N = n1->len-1;
 	l_add(n1, n2, res);
-	int c = res->words[N];
-	res->words[N] = res->words[0] < res->words[N];
-	if (!(res->words[N])) {
-		res->words[0]-=c;
-	}
-	else {
-		L_NUMBER tmp;
-		l_init(&tmp, N+1); tmp.words[0]=c-1;
-		l_sub(res, &tmp, res);
-		l_free(&tmp);
+	if (res->words[N] != 0) {
+		l_sub(res, &base, res);
 	}
 }
 
@@ -208,11 +207,11 @@ Z2N1_AR_FUNCTION void z2n1_dft_inv_ordinary(L_NUMBER* inp, WORD K, L_NUMBER* out
 }
 
 LONG_AR_FUNC double l_mul_shonhage_strassen(const L_NUMBER* n1, const L_NUMBER* n2, AUTO_SIZE L_NUMBER* res) {
-	WORD Nbit = n1->len*ARCH;
+	WORD Nbit = 2*n1->len*ARCH;
 	WORD logNbits = word_bit_len(Nbit) - 1;
 	WORD k = (logNbits >> 1) + 1;
-	WORD K = (1 << k);
-	WORD n = 1 << word_bit_len(2*Nbit / K + k);
+	WORD K = ((WORD)1 << k);
+	WORD n = (WORD)1 << word_bit_len(2*Nbit / K + k);
 	WORD N = n/ARCH;
 	z2n1_init_base(N);
 	WORD M = (Nbit >> k)/ARCH;
@@ -220,8 +219,11 @@ LONG_AR_FUNC double l_mul_shonhage_strassen(const L_NUMBER* n1, const L_NUMBER* 
 	L_NUMBER* bufB = malloc(sizeof(L_NUMBER)*K);
 	L_NUMBER* mem = malloc(sizeof(L_NUMBER)*K);
 	double eff = ((2.0*Nbit / K) + k) / n;
+	#ifdef DEBUG
 	printf("n: %d\nK: %d\nM: %d\n", n, K, M*ARCH);
-	for (u32 i=0; i<K; i++) {
+	#endif
+	/* Decompose stage */
+	for (u32 i=0; i<K/2; i++) {
 		bufA[i].words = 0; bufA[i].len = 0;
 		bufB[i].words = 0; bufB[i].len = 0;
 		l_init(&(bufA[i]), N+1);
@@ -231,6 +233,19 @@ LONG_AR_FUNC double l_mul_shonhage_strassen(const L_NUMBER* n1, const L_NUMBER* 
 		L_NUMBER curB = {n2->words+i*M, M};
 		l_copy(&(bufA[i]), &curA);
 		l_copy(&(bufB[i]), &curB);
+		#ifdef DEBUG
+		printf("A[%i] = ", i); l_dump(&bufA[i], 'h');
+		printf("B[%i] = ", i); l_dump(&bufB[i], 'h');
+		#endif
+	}
+	for (u32 i=K/2; i<K; i++) {
+		l_init(&(bufA[i]), N+1);
+		l_init(&(bufB[i]), N+1);
+		l_init(&(mem[i]), N+1);
+		#ifdef DEBUG
+		printf("A[%i] = ", i); l_dump(&bufA[i], 'h');
+		printf("B[%i] = ", i); l_dump(&bufB[i], 'h');
+		#endif
 	}
 
 	/* Applying weighted DFT */
@@ -239,26 +254,37 @@ LONG_AR_FUNC double l_mul_shonhage_strassen(const L_NUMBER* n1, const L_NUMBER* 
 
 	/* Negacyclic convolution */
 	for (u32 i=0; i<K; i++) {
+		#ifdef DEBUG
+		printf("~A[%i]: ", i); l_dump(&bufA[i], 'h');
+		printf("~B[%i]: ", i); l_dump(&bufB[i], 'h');
+		#endif
 		z2n1_mul( &(bufA[i]), &(bufB[i]), &(bufA[i]) );
+		#ifdef DEBUG
+		printf("~C[%i]: ", i); l_dump(&bufA[i], 'h');
+		#endif
 	}
 
 	/* Applying inverse weighted DFT */
 	z2n1_weighted_fft_inv(bufA, mem, K);
 
-	/* Recompose (glucks present definetely) */
+	/* Recompose stage */
 	L_NUMBER r = {0,0};
 
-	if (res->len == 0) {
-		l_init(&r, 2*n1->len);
-		*res = r;
-	}
+	l_init(&r, 2*n1->len);
+
+	L_NUMBER carry;
+	l_init(&carry, 2*M);
 
 	for (u32 i=0; i<K; i++) {
-		printf("C[%i]: ", i);
-		l_dump(&bufA[i], 'h');
-		L_NUMBER prt1 = {r.words+i*M, 2*M+k};
-		L_NUMBER prt2 = {bufA[i].words, 2*M+k};
-		//l_add(&prt1, &prt2, &prt1);
+		#ifdef DEBUG
+		printf("F_inv[%i] = ", i); l_dump(&bufA[i], 'h');
+		#endif
+
+		int K_last = i != K-1;
+		L_NUMBER prt1 = {r.words+i*M, 2*M+K_last}; 
+		L_NUMBER prt2 = {bufA[i].words, 2*M+K_last}; // supposing k < 64
+
+		l_add(&prt1, &prt2, &prt1);
 
 		l_free(&(bufA[i]));
 		l_free(&(bufB[i]));
@@ -270,8 +296,7 @@ LONG_AR_FUNC double l_mul_shonhage_strassen(const L_NUMBER* n1, const L_NUMBER* 
 
 	z2n1_destroy_base();
 
-	if (res->len != 0) {
-		l_copy(res, &r);
-	}
+	l_copy(res, &r);
+
 	return eff;
 }

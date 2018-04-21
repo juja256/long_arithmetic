@@ -20,7 +20,7 @@ static inline void _mul_raw(unsigned long long a, unsigned long long b, unsigned
 }
 #endif
 
-static _l_mul_func l_mul_func = l_mul;
+_l_mul_func l_mul_func = l_mul;
 
 INTERNAL_AR_FUNC static void l_mul_half_digit(const L_NUMBER* n, HALF d, L_NUMBER* res) {
     WORD carry = 0, tmp;

@@ -12,7 +12,13 @@ extern "C" {
 #define INTERNAL_AR_FUNC
 #define Z2N1_AR_FUNCTION
 
+#if defined(_M_AMD64) || defined(__amd64__) || defined(__x86_64)
 #define ARCH 64
+#else
+#define ARCH 32
+#endif
+
+//#define DEBUG
 
 typedef unsigned int u32;
 typedef unsigned short u16;
@@ -127,7 +133,7 @@ MODULAR_AR_FUNC void m_sqr(const L_NUMBER* a, const L_NUMBER* n, L_NUMBER* mu, L
 
 MODULAR_AR_FUNC void m_mul_blakley(const L_NUMBER* n1, const L_NUMBER* n2, const L_NUMBER* n, L_NUMBER* res);
 
-/* Section 3: Arithmetic in ring Z_{2^n + 1}*/
+/* Section 3: Arithmetic in ring Z_{2^n + 1} for SSA */
 Z2N1_AR_FUNCTION void z2n1_init_base(WORD N);
 
 Z2N1_AR_FUNCTION void z2n1_destroy_base();
@@ -136,7 +142,7 @@ Z2N1_AR_FUNCTION void z2n1_add(const L_NUMBER* n1, const L_NUMBER* n2, L_NUMBER*
 
 Z2N1_AR_FUNCTION void z2n1_sub(const L_NUMBER* n1, const L_NUMBER* n2, L_NUMBER* res);
 
-Z2N1_AR_FUNCTION void z2n1_normalize(const L_NUMBER* n, WORD N, L_NUMBER* res);
+Z2N1_AR_FUNCTION void z2n1_normalize(const L_NUMBER* n, L_NUMBER* res);
 
 Z2N1_AR_FUNCTION void z2n1_mul(const L_NUMBER* n1, const L_NUMBER* n2, L_NUMBER* res);
 

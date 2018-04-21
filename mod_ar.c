@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 extern int l_init(L_NUMBER* n, u32 words_len);
+extern _l_mul_func l_mul_func;
 
 MODULAR_AR_FUNC void m_pre_barret(u32 l, const L_NUMBER* n, L_NUMBER* mu) {
 	L_NUMBER r, b, t, N;
@@ -28,9 +29,9 @@ MODULAR_AR_FUNC void m_redc_barret(const L_NUMBER* a, const L_NUMBER* n, L_NUMBE
 	l_copy(&q, a);
 
 	l_shift_r(&q, (S_WORD)((a->len / 2) - 1)*ARCH, &q);
-	l_mul(&q, mu, &q);
+	l_mul_func(&q, mu, &q);
 	l_shift_r(&q, ((a->len / 2) + 1)*ARCH, &q);
-	l_mul(&q, n, &q);
+	l_mul_func(&q, n, &q);
 	l_sub(a, &q, &q);
 
 	if (q.words[n->len]) {
@@ -80,7 +81,7 @@ MODULAR_AR_FUNC void m_gcd(const L_NUMBER* a, const L_NUMBER* b, L_NUMBER* res) 
 			l_sub(&r, &q, &r);
 		}
 	}
-	l_mul(res, &q, res);
+	l_mul_func(res, &q, res);
 
 	l_free(&d);
 	l_free(&zero);
@@ -93,7 +94,7 @@ MODULAR_AR_FUNC void m_lcm(const L_NUMBER* n1, const L_NUMBER* n2, L_NUMBER* res
 	l_init(&g, res->len);
 	l_init(&tmp, res->len);
 
-	l_mul(n1, n2, res);
+	l_mul_func(n1, n2, res);
 	m_gcd(n1, n2, &g);
 	l_div(res, &g, res, &tmp);
 
@@ -129,7 +130,7 @@ MODULAR_AR_FUNC void m_sqr(const L_NUMBER* a, const L_NUMBER* n, L_NUMBER* mu, L
 MODULAR_AR_FUNC void m_mul(const L_NUMBER* n1, const L_NUMBER* n2, const L_NUMBER* n, L_NUMBER* mu, L_NUMBER* res) {
     L_NUMBER t;
     l_init(&t, 2*n1->len);
-	l_mul(n1, n2, &t);
+	l_mul_func(n1, n2, &t);
 	m_redc_barret(&t, n, mu, res);
     l_free(&t);
 }

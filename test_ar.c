@@ -1,7 +1,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "long_ar.h"
+
+#ifdef _WIN64
+#include <intrin.h>
+#pragma intrinsic(_umul128) 
+#include <windows.h>
+#else
+#include <x86intrin.h>
 #include <time.h>
+double GetTickCount(void) 
+{
+  struct timespec now;
+  if (clock_gettime(CLOCK_MONOTONIC, &now))
+    return 0;
+  return now.tv_sec * 1000.0 + now.tv_nsec / 1000000.0;
+}
+#endif // _WIN64
 
 void test_basic() {
   L_NUMBER n1;
@@ -298,6 +313,7 @@ void test_karatsuba() {
           b.words[i] = (u64)rand() << 32 | (u64)rand();
 
       l_mul_karatsuba(&a, &b, &c);
+
       l_mul(&a, &b, &d);
 
       l_dump(&a, 'h');
@@ -331,9 +347,10 @@ void test_karatsuba() {
 }
 
 void test_ssa() {
-  int N = 1<<10;
+  //srand(time(NULL));
+  int N = 983040/(64)/2;
   //int K=1024;
-  L_NUMBER a,b,c={0,0}, d={0,0};
+  L_NUMBER a,b,c={0,0}, d={0,0}, k={0,0};
   l_init(&a, N);
   for (unsigned i=0;i<a.len; i++)
       a.words[i] = (u64)rand() << 32 | (u64)rand();
@@ -341,9 +358,31 @@ void test_ssa() {
   for (unsigned i=0;i<a.len; i++)
       b.words[i] = (u64)rand() << 32 | (u64)rand();
 
-  double eff = l_mul_shonhage_strassen(&a, &b, &c);
-  printf("Efficiency: %lf\n", eff);
+  printf("A: "); l_dump(&a, 'h');
+  printf("B: "); l_dump(&b, 'h');
 
+  double s1 = GetTickCount();
+  double eff = l_mul_shonhage_strassen(&a, &b, &c);
+  double s2 = GetTickCount();
+  l_mul(&a, &b, &d);
+  double s3 = GetTickCount();
+  l_mul_karatsuba(&a, &b, &k);
+  double s4 = GetTickCount();
+
+  printf("C_school, time: %lf\n", s3-s2);
+  l_dump(&d, 'h');
+  
+  printf("C_karatsuba, time: %lf\n", s4-s3); 
+  l_dump(&k, 'h');
+
+  printf("C_ssa, time: %lf, efficiency: %lf\n", s2-s1, eff); 
+  l_dump(&c, 'h');
+
+  if (l_cmp(&d, &c) == 0) 
+    printf("SSA Test passed!!!");
+  else {
+    printf("SSA Error!!!");
+  }
 }
 
 int main() {
