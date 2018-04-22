@@ -7,10 +7,18 @@ Classical long arithmetic and Galois fields realisation in C.
   - Library provides three algorithms for multiplication: School algorithm that runs at O(n^2),Karatsuba's recursive algorithm - O(n^log3) and Schönhage-Strassen's algorithm - O(n*log(n)*lo(log(n))). By default inner functions such as powering use common school multiplication, inorder to change this behavior call `set_l_mul_func` with appropriate backend multiplicationfunction. Schönhage-Strassen's algorithm implementation is based onhttps://hal.inria.fr/inria-00126462v1. It accepts only numbers of equal length in format N = M *2^k, where K = 2^k is number of blocks of Mbit words input numbers are split in the decomposestage of algorithm. In current implementation additional condition must hold for M: it must bedivisible by ARCH/2, where ARCH is the size of machine word.
 
 
-To run test_extern_lib.cpp:
+Generate numbers for test:
+0. help: run python genNumber.py
+
+To run test/test_extern_lib.cpp:
 1.   install gmp,openssl,ntl libs:
    - gmp:     sudo apt-get install libgmp3-dev;
    - openssl: sudo apt-get install libssl-dev;
    - ntl:     http://www.shoup.net/ntl/doc/tour-unix.html
 2.   compile: g++ -g -O2 test_extern_lib.cpp -o <exe_name> -lgmp -lssl -lcrypto -lntl -lm;
 3.   help:    run ./<exe_name>
+
+To run test/test_long_ar.cpp:
+1. compile : g++ --std=c++11 test_long_ar.cpp ../long_ar.c ../ssa.c -o <exe_name>
+2. help:     run ./<exe_name>
+

@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
         // argv[3] = <number_1>, argv[4] = <number_2>, argv[5] = <base>
         printf("Usage: ./execute_program_name ");
         printf("<number_lib> <numbers_from_file_or_console> [<number_1> <number_2>][if numbers from console ~ -c] ");
-        printf("<base> <file_name\n");
+        printf("<base> <file_name>[if numbers from file ~ -f]\n");
         printf("where: <number_lib> = [GMP=1, OpenSSL=2, NTL=3]\n");
         printf("<numbers_from_file_or_console> = [-f, -c]\n");
         printf("<base> for: GMP      = [2, 8, 10, 16]\n");
@@ -44,7 +44,7 @@ int main(int argc, char* argv[])
         printf("  -- multiply two hexadecimal numbers: A45E & 34DE with Openssl lib\n");
         printf("> ./test_ext_libs 1 -c 10 10 2\n");
         printf("  -- multiply two binary numbers: 10 & 10 with GMP lib\n\n");
-        printf("Example for test from file(numbers choosing from file): \n\n");
+        printf("Example for test multiplication numbers from file: \n\n");
         printf("> ./test_ext_libs 2 -f 16 file_name\n");
         printf("  -- multiply pairs of numbers from file with Openssl lib\n");
        
@@ -140,6 +140,7 @@ int main(int argc, char* argv[])
         {
             nums.push_back(number);
         }
+        ifs.close();
         int testNumber = nums.size()/2;
 
         std::deque<double> testTimes;
@@ -268,12 +269,12 @@ int main(int argc, char* argv[])
             avg_time += time;
         }
         avg_time = avg_time / (testNumber-1);
-        
         printf("Avg time: %1f\n", avg_time);
     
         auto iter_max_time = std::max_element(std::begin(testTimes),std::end(testTimes));
         double max_time = *iter_max_time;
         printf("Max time: %1f\n", max_time);
+        
         return 0;
     }
 }
