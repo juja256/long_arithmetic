@@ -8,14 +8,14 @@ Classical long arithmetic and Galois fields realisation in C.
 
 
 Generate numbers for test:
-0. help: run python genNumber.py
+1. help: run python genNumber.py
 
 To run test/test_extern_lib.cpp:
 1.   install gmp,openssl,ntl libs:
    - gmp:     sudo apt-get install libgmp3-dev;
    - openssl: sudo apt-get install libssl-dev;
    - ntl:     http://www.shoup.net/ntl/doc/tour-unix.html
-2.   compile: g++ -g -O2 test_extern_lib.cpp -o <exe_name> -lgmp -lssl -lcrypto -lntl -lm;
+2.   compile: g++ --std=c++11 -g -O2 test_extern_lib.cpp -o <exe_name> -lgmp -lssl -lcrypto -lntl -lm;
 3.   help:    run ./<exe_name>
 
 To run test/test_long_ar.cpp:
