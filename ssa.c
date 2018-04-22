@@ -215,9 +215,9 @@ LONG_AR_FUNC double l_mul_shonhage_strassen(const L_NUMBER* n1, const L_NUMBER* 
 	WORD N = n/ARCH;
 	z2n1_init_base(N);
 	WORD M = (Nbit >> k)/ARCH;
-	L_NUMBER* bufA = malloc(sizeof(L_NUMBER)*K);
-	L_NUMBER* bufB = malloc(sizeof(L_NUMBER)*K);
-	L_NUMBER* mem = malloc(sizeof(L_NUMBER)*K);
+	L_NUMBER* bufA = (L_NUMBER*)malloc(sizeof(L_NUMBER)*K);
+	L_NUMBER* bufB = (L_NUMBER*)malloc(sizeof(L_NUMBER)*K);
+	L_NUMBER* mem = (L_NUMBER*)malloc(sizeof(L_NUMBER)*K);
 	double eff = ((2.0*Nbit / K) + k) / n;
 	#ifdef DEBUG
 	printf("n: %d\nK: %d\nM: %d\n", n, K, M*ARCH);
