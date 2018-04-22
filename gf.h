@@ -1,6 +1,10 @@
 #ifndef GF_H
 #define GF_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define COMMON_GF
 #define POLYNOMIAL_BASIS
 #define NORMAL_BASIS
@@ -102,5 +106,9 @@ NORMAL_BASIS void n_pow_power_of_two(const GF_ELEMENT* a, u32 k, GF_ELEMENT* res
 NORMAL_BASIS void n_pow(const GF_ELEMENT* a, const GF_ELEMENT* n, GF_ELEMENT* table, GF_ELEMENT* res);
 
 NORMAL_BASIS int n_trace(const GF_ELEMENT* a);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

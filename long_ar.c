@@ -384,7 +384,7 @@ LONG_AR_FUNC void l_mul_karatsuba(const L_NUMBER* a, const L_NUMBER* b, L_NUMBER
 COMMON_AR_FUNC void l_dump(const L_NUMBER* n, char format) {
     WORD b;
     switch (format) {
-        case 'd':
+        case 'd': {
             b = l_bit_len(n);
 
             b = (WORD)(b/3.322) + 1;
@@ -410,23 +410,29 @@ COMMON_AR_FUNC void l_dump(const L_NUMBER* n, char format) {
             l_free(&a);
             l_free(&c);
             free(digits);
-        break;
-        case 'b':
+            break;
+        }
+            
+        case 'b': {
             printf("0b");
             for (int i = ARCH * n->len - 1; i>=0; i--) {
                 printf("%d", (n->words[i/ARCH] & ( (WORD)1 << (i%ARCH) )) >> (i%ARCH) );
             }
 
             printf("\n");
-        break;
-        case 'h':
+            break;
+        }
+            
+        case 'h': {
             printf("0x");
             for (int i=n->len-1; i>=0; i--) {
                 printf(HEX_FORMAT, n->words[i]);
             }
 
             printf("\n");
-        break;
+            break;
+        }
+            
         default:
 
         break;
