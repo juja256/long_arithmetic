@@ -7,11 +7,13 @@ extern _l_mul_func l_mul_func;
 
 MODULAR_AR_FUNC void m_pre_barret(u32 l, const L_NUMBER* n, L_NUMBER* mu) {
 	L_NUMBER r, b, t, N;
+	if (mu->len == 0) {
+		l_init(mu, l);
+	}
 	l_init(&t, l+1);
 	l_init(&r, l+1);
-	l_init(&b, l+1); b.words[0] = 1;
+	l_init(&b, l+1); b.words[l] = 1;
 	l_init(&N, l+1); l_copy(&N, n);
-	l_shift_l(&b, l*ARCH, &b);
 	l_div(&b, &N, &t, &r);
 	for (u32 i=0; i<mu->len; i++)
 		mu->words[i] = t.words[i];
