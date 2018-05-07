@@ -42,6 +42,12 @@ INTERNAL_AR_FUNC static void l_mul_half_digit(const L_NUMBER* n, HALF d, L_NUMBE
     }
 }
 
+COMMON_AR_FUNC void l_resize(L_NUMBER* a, u32 bit_len) {
+    if (bit_len <= a->len*ARCH) {
+        a->len = (bit_len % ARCH == 0) ? bit_len/ARCH : bit_len/ARCH + 1;
+    }
+}
+
 /* Static End */
 COMMON_AR_FUNC int set_l_mul_func(_l_mul_func func) {
     if (func){

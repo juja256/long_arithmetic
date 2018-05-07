@@ -71,6 +71,8 @@ COMMON_AR_FUNC void l_copy(L_NUMBER* dest, const L_NUMBER* source);
 
 COMMON_AR_FUNC void l_free(L_NUMBER* n);
 
+COMMON_AR_FUNC void l_resize(L_NUMBER* a, u32 bit_len);
+
 COMMON_AR_FUNC void l_dump(const L_NUMBER* n, char format);
 
 COMMON_AR_FUNC u32 l_bit_len(const L_NUMBER* n);
