@@ -24,10 +24,12 @@ MODULAR_AR_FUNC void m_pre_barret(u32 l, const L_NUMBER* n, L_NUMBER* mu) {
 }
 
 MODULAR_AR_FUNC void m_redc_barret(const L_NUMBER* a, const L_NUMBER* n, L_NUMBER* mu, L_NUMBER* res) {
+	if ((a->len == 2) && (a->words[1] == 0)) {
+		res->words[0] = a->words[0] % n->words[0];
+		return;
+	}
 	L_NUMBER q;
 	l_init(&q, 2*a->len);
-	L_NUMBER r;
-	l_init(&r, n->len);
 	l_copy(&q, a);
 
 	l_shift_r(&q, (S_WORD)((a->len / 2) - 1)*ARCH, &q);
@@ -39,14 +41,14 @@ MODULAR_AR_FUNC void m_redc_barret(const L_NUMBER* a, const L_NUMBER* n, L_NUMBE
 	if (q.words[n->len]) {
 		l_sub(&q, n, &q);
 	} // Preventing overflow
-    l_copy(&r, &q);
 
-	while (l_cmp(&r, n) != -1) {
-		l_sub(&r, n, &r);
+	l_resize(&q, n->len*ARCH);
+		
+	while ( l_cmp(&q, n) != -1 ) {
+		l_sub(&q, n, &q);
 	}
-	l_copy(res, &r);
+	l_copy(res, &q);
     l_free(&q);
-    l_free(&r);
 }
 
 MODULAR_AR_FUNC void m_gcd(const L_NUMBER* a, const L_NUMBER* b, L_NUMBER* res) {
