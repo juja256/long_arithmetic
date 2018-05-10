@@ -38,12 +38,13 @@ MODULAR_AR_FUNC void m_redc_barret(const L_NUMBER* a, const L_NUMBER* n, L_NUMBE
 	l_mul_func(&q, n, &q);
 	l_sub(a, &q, &q);
 
-	if (q.words[n->len]) {
+	WORD msbs = q.words[n->len];
+	l_resize(&q, n->len*ARCH);
+
+	if ( msbs != 0 ) {
 		l_sub(&q, n, &q);
 	} // Preventing overflow
 
-	l_resize(&q, n->len*ARCH);
-		
 	while ( l_cmp(&q, n) != -1 ) {
 		l_sub(&q, n, &q);
 	}
